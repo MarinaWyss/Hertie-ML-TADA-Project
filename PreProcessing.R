@@ -1,9 +1,10 @@
 library(dplyr)
 library(tools)
 library(stringr)
+library(quanteda)
 
 # your filepath here
-path <- "/Users/marinabennett/Desktop/Hertie/1. Fall 2019/Machine Learning/Hertie-ML-TADA-Project/newspaper-data/English"
+path <- "/Users/madelinebrady/Desktop/Fall 2019/Hertie-ML-TADA-Project/newspaper-data/English"
 
 # create list of all outlets
 filenamesList <- list.files(path = path, full.names = TRUE)
@@ -33,4 +34,33 @@ foxnews_df$topic_tags <- "NA"
 infowars_df$topic_tags <- "NA"
 
 fullDataSet <- do.call("rbind", lapply(newsNames, get))
+
+# prepare the data
+## split the datetime column into two
+fullDataSet$time <- format(as.POSIXct(fullDataSet$datetime, format="%Y:%m:%d %H:%M:%S"), "%H:%M:%S")
+fullDataSet$date <- format(as.POSIXct(fullDataSet$datetime, format="%Y:%m:%d %H:%M:%S"), "%Y:%m:%d")
+fullDataSet <- fullDataSet %>% select(-datetime)
+fullDataSet = fullDataSet %>% select(outlet, outlet_url, date, time, url_orig, headline, description, 
+                       author, domain, topic_tags, text)
+
+# split data (70/30 - Train/Test)
+## set seed for reproducibility
+set.seed(123) 
+index <- sample(1:nrow(fullDataSet), round(nrow(fullDataSet) * 0.7))
+trainDataSet <- fullDataSet[index, ]
+testDataSet  <- fullDataSet[-index, ]
+
+# create a corpus using quanteda 
+trainCorpus <- corpus(trainDataSet, text_field = "text", metacorpus = NULL, compress = FALSE)
+
+#create a document term matrix
+## tokenize by sentance and delete URLs
+### make all letters lowercase, stem and remove stopwords
+trainDfm <- trainCorpus %>%
+  tokens(what = "sentence", remove_url = TRUE) %>%
+  dfm(tolower = TRUE, stem = TRUE, remove = stopwords("en"))
+
+
+
+
 
