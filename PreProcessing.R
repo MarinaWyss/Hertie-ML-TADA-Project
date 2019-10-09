@@ -4,7 +4,7 @@ library(stringr)
 library(quanteda)
 
 # your filepath here
-path <- "/Users/madelinebrady/Desktop/Fall 2019/Hertie-ML-TADA-Project/newspaper-data/English"
+path <- "/Users/Jan/Desktop/Marina/Hertie-ML-TADA-Project/newspaper-data/English"
 
 # create list of all outlets
 filenamesList <- list.files(path = path, full.names = TRUE)
@@ -53,13 +53,36 @@ testDataSet  <- fullDataSet[-index, ]
 # create a corpus using quanteda 
 trainCorpus <- corpus(trainDataSet, text_field = "text", metacorpus = NULL, compress = FALSE)
 
-#create a document term matrix
-## tokenize by sentance and delete URLs
-### make all letters lowercase, stem and remove stopwords
-trainDfm <- trainCorpus %>%
-  tokens(what = "sentence", remove_url = TRUE) %>%
-  dfm(tolower = TRUE, stem = TRUE, remove = stopwords("en"))
+#create a document feature matrix
+## tokenize by word, pre-process, create dfm
+trainTokens <- trainCorpus %>%
+  tokens(what = "word", 
+         remove_url = TRUE, 
+         remove_punct = TRUE, 
+         remove_separators = TRUE, 
+         remove_numbers = TRUE)
 
+trainTokens <- tokens_select(trainTokens, 
+                             stopwords('english'), 
+                             selection = 'remove')
+
+trainTokens <- tokens_wordstem(trainTokens)
+
+trainDfm <- dfm(trainTokens)
+
+## version with sentences
+trainTokens <- trainCorpus %>%
+  tokens(what = "sentence", 
+         remove_url = TRUE, 
+         remove_punct = TRUE, 
+         remove_separators = TRUE, 
+         remove_numbers = TRUE)
+
+trainTokens <- tokens_select(trainTokens, 
+                             stopwords('english'), 
+                             selection = 'remove')
+
+trainDfmSentence <- dfm(trainTokens)
 
 
 
