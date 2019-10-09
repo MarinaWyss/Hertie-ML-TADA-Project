@@ -2,9 +2,12 @@ library(dplyr)
 library(tools)
 library(stringr)
 library(quanteda)
+library(topicmodels)
+library(tidytext)
+library(tidyr)
 
 # your filepath here
-path <- "/Users/Jan/Desktop/Marina/Hertie-ML-TADA-Project/newspaper-data/English"
+path <- "/Users/madelinebrady/Desktop/Fall 2019/Hertie-ML-TADA-Project/newspaper-data/English"
 
 # create list of all outlets
 filenamesList <- list.files(path = path, full.names = TRUE)
@@ -84,6 +87,43 @@ trainTokens <- tokens_select(trainTokens,
 
 trainDfmSentence <- dfm(trainTokens)
 
+# Create an LDA object (without a control argument)
+trainLDA <- LDA(trainDfm, k = 15, control = list(seed = 1234))
+
+# Word-topic probabilities analysis of LDA object
+## Extract per-topic-per-word probabilities (Beta) using tidytext package
+trainTopics <- tidy(trainLDA, matrix = "beta")
+
+### Find the 10 terms that are most common within each topic and vizualize
+topicsTopTerms <- trainTopics %>%
+  group_by(topic) %>%
+  top_n(10, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+
+topicsTopTerms %>%
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(term, beta, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip() +
+  scale_x_reordered()
+
+### Find terms with greatest difference in beta and vizualize
+spreadTopTerms <- trainTopics %>%
+  mutate(topic = paste0("topic", topic)) %>%
+  spread(topic, beta) %>%
+  filter(topic1 > .001 | topic2 > .001) %>%
+  mutate(log_ratio = log2(topic2 / topic1))
+
+# Document-topic probabilities analysis of LDA object
+## Extract per-document-per-topic probabilities (Gamma) using tidytext package
+trainTopics <- tidy(trainLDA, matrix = "gamma")
+
+### check the most common words within a specific document
+tidy(trainDfm) %>%
+  filter(document == 6) %>%
+  arrange(desc(count))
 
 
 
