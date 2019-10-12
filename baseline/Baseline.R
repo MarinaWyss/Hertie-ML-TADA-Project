@@ -112,23 +112,11 @@ accuracyNYT <- (sum(trueTestNYT$accurate) / nrow(trueTestNYT))
 # distribution of topics
 
 ## WSJ 
-
-# plots
 wsjBefore <- wsjBaseline %>%
   filter(date == "2018:05:07") 
 
-wsjBeforePlot <- ggplot(aes(x = topic), data = wsjBefore) +
-  geom_bar(stat = "count", aes(fill = topic), color = "white") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        text = element_text(size = 18, family="Times"))
-
 wsjAfter <- wsjBaseline %>%
   filter(date == "2018:05:08") 
-
-wsjAfterPlot <- ggplot(aes(x = topic), data = wsjAfter) +
-  geom_bar(stat = "count", aes(fill = topic), color = "white") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        text = element_text(size = 18, family="Times"))
 
 # proportions
 wsjBeforeProp <- wsjBefore %>%
@@ -149,24 +137,31 @@ wsjProp <- merge(wsjBeforeProp, wsjAfterProp, by = "topic", all = TRUE)
 wsjProp$change <- wsjProp$propAfter - wsjProp$propBefore
 
 
-## NY Times 
-
 # plots
+wsjBeforePlot <- ggplot(aes(x = topic, y = propBefore), data = wsjProp) +
+  geom_col(aes(fill = topic), color = "white") +
+  ylim(0, 0.35) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        text = element_text(size = 18, family="Times")) +
+  labs(x = "Topics on May 7th, 2018", 
+       y = "Proportion out of total topics")
+
+
+wsjAfterPlot <- ggplot(aes(x = topic, y = propAfter), data = wsjProp) +
+  geom_col(aes(fill = topic), color = "white") +
+  ylim(0, 0.35) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        text = element_text(size = 18, family="Times")) +
+  labs(x = "Topics on May 8th, 2018", 
+       y = "Proportion out of total topics")
+
+
+## NY Times 
 nyTimesBefore <- nyTimesBaseline %>%
   filter(date == "2018:05:07") 
 
-nyTimesBeforePlot <- ggplot(aes(x = topic), data = nyTimesBefore) +
-  geom_bar(stat = "count", aes(fill = topic), color = "white") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        text = element_text(size = 18, family="Times"))
-
 nyTimesAfter <- nyTimesBaseline %>%
   filter(date == "2018:05:08") 
-
-nyTimesAfterPlot <- ggplot(aes(x = topic), data = nyTimesAfter) +
-  geom_bar(stat = "count", aes(fill = topic), color = "white") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        text = element_text(size = 18, family="Times"))
 
 # proportions
 nyTimesBeforeProp <- nyTimesBefore %>%
@@ -186,7 +181,26 @@ nyTimesAfterProp <- nyTimesAfterProp %>%
 nyTimesProp <- merge(nyTimesBeforeProp, nyTimesAfterProp, by = "topic", all = TRUE)
 nyTimesProp$change <- nyTimesProp$propAfter - nyTimesProp$propBefore
 
-## formatting
+# plots
+
+nyTimesBeforePlot <- ggplot(aes(x = topic, y = propBefore), data = nyTimesProp) +
+  geom_col(aes(fill = topic), color = "white") +
+  ylim(0, 0.35) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        text = element_text(size = 18, family="Times")) +
+  labs(x = "Topics on May 7th, 2018", 
+       y = "Proportion out of total topics")
+
+nyTimesAfterPlot <- ggplot(aes(x = topic, y = propAfter), data = nyTimesProp) +
+  geom_col(aes(fill = topic), color = "white") +
+  ylim(0, 0.35) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        text = element_text(size = 18, family="Times")) +
+  labs(x = "Topics on May 8th, 2018", 
+       y = "Proportion out of total topics")
+
+
+## formatting table
 
 propChange <- merge(wsjProp, nyTimesProp, by = "topic", all = TRUE)
 propChange[is.na(propChange)] <- 0
