@@ -16,6 +16,8 @@ nyTimesBaseline <- read.csv("nyTimesBaseline.csv")
 
 wsjBaseline$text <- as.character(wsjBaseline$text)
 nyTimesBaseline$text <- as.character(nyTimesBaseline$text)
+nyTimesBaseline$topic <- tolower(nyTimesBaseline$topic)
+
 
 
 # WSJ pre-processing
@@ -45,13 +47,13 @@ set.seed(123)
 wsjsmp <- sample(c("train", "test"), size=ndoc(wsjCorpus), 
                  prob=c(0.70, 0.30), replace=TRUE)
 
-train <- which(wsjsmp == "train")
-test <- which(wsjsmp == "test")
+trainWSJ <- which(wsjsmp == "train")
+testWSJ <- which(wsjsmp == "test")
 
 
 # NY Times pre-processing
 nyTimesCorpus <- corpus(nyTimesBaseline, text_field = "text", metacorpus = NULL, compress = FALSE)
-docvars(nyTimesCorpus, "topic") <- nyTimes$topic
+docvars(nyTimesCorpus, "topic") <- nyTimesBaseline$topic
 
 nyTimesTokens <- nyTimesCorpus %>%
   tokens(what = "word", 
@@ -74,22 +76,22 @@ set.seed(123)
 nytsmp <- sample(c("train", "test"), size=ndoc(nyTimesCorpus), 
                  prob=c(0.70, 0.30), replace=TRUE)
 
-train <- which(nytsmp == "train")
-test <- which(nytsmp == "test")
+trainNYT <- which(nytsmp == "train")
+testNYT <- which(nytsmp == "test")
 
 
 
 # training Naive Bayes models
-wsjNB <- textmodel_nb(wsjDfm[train,], docvars(wsjCorpus, "topic")[train])
-wsjPreds <- predict(wsjNB, newdata = wsjDfm[test,])
+wsjNB <- textmodel_nb(wsjDfm[trainWSJ, ], docvars(wsjCorpus, "topic")[trainWSJ])
+wsjPreds <- predict(wsjNB, newdata = wsjDfm[testWSJ,])
 
-nyTimesNB <- textmodel_nb(nyTimesDfm[train,], docvars(nyTimesCorpus, "topic")[train])
-nyTimesPreds <- predict(nyTimesNB, newdata = nyTimesDfm[test,])
+nyTimesNB <- textmodel_nb(nyTimesDfm[trainNYT,], docvars(nyTimesCorpus, "topic")[trainNYT])
+nyTimesPreds <- predict(nyTimesNB, newdata = nyTimesDfm[testNYT,])
 
 
 # testing
-wsjCM <- table(wsjPreds, docvars(wsjCorpus, "topic")[test])
-nyTimesCM <- table(nyTimesPreds, docvars(nyTimesCorpus, "topic")[test])
+wsjCM <- table(wsjPreds, docvars(wsjCorpus, "topic")[testWSJ])
+nyTimesCM <- table(nyTimesPreds, docvars(nyTimesCorpus, "topic")[testNYT])
 
 precrecall <- function(mytable, verbose=TRUE) {
   truePositives <- mytable[1,1]
@@ -123,7 +125,7 @@ wsjBefore <- wsjBaseline %>%
 wsjBeforePlot <- ggplot(aes(x = topic), data = wsjBefore) +
   geom_bar(stat = "count", aes(fill = topic), color = "white") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        text = element_text(family="Times"))
+        text = element_text(size = 18, family="Times"))
 
 wsjAfter <- wsjBaseline %>%
   filter(date == "2018:05:08") 
@@ -131,7 +133,7 @@ wsjAfter <- wsjBaseline %>%
 wsjAfterPlot <- ggplot(aes(x = topic), data = wsjAfter) +
   geom_bar(stat = "count", aes(fill = topic), color = "white") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        text = element_text(family="Times"))
+        text = element_text(size = 18, family="Times"))
 
 # proportions
 wsjBeforeProp <- wsjBefore %>%
@@ -148,13 +150,8 @@ wsjAfterProp <- wsjAfter %>%
 wsjAfterProp <- wsjAfterProp %>%
   mutate(propAfter = (n/sum(n)))
 
-wsjProp <- merge(wsjBeforeProp, wsjAfterProp, by = "topic")
+wsjProp <- merge(wsjBeforeProp, wsjAfterProp, by = "topic", all = TRUE)
 wsjProp$change <- wsjProp$propAfter - wsjProp$propBefore
-
-wsjProp %>%
-  select(topic, propBefore, propAfter, change) %>%
-  kable %>%
-  kable_styling()
 
 
 ## NY Times 
@@ -166,7 +163,7 @@ nyTimesBefore <- nyTimesBaseline %>%
 nyTimesBeforePlot <- ggplot(aes(x = topic), data = nyTimesBefore) +
   geom_bar(stat = "count", aes(fill = topic), color = "white") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        text = element_text(family="Times"))
+        text = element_text(size = 18, family="Times"))
 
 nyTimesAfter <- nyTimesBaseline %>%
   filter(date == "2018:05:08") 
@@ -174,7 +171,7 @@ nyTimesAfter <- nyTimesBaseline %>%
 nyTimesAfterPlot <- ggplot(aes(x = topic), data = nyTimesAfter) +
   geom_bar(stat = "count", aes(fill = topic), color = "white") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        text = element_text(family="Times"))
+        text = element_text(size = 18, family="Times"))
 
 # proportions
 nyTimesBeforeProp <- nyTimesBefore %>%
@@ -191,10 +188,39 @@ nyTimesAfterProp <- nyTimesAfter %>%
 nyTimesAfterProp <- nyTimesAfterProp %>%
   mutate(propAfter = (n/sum(n)))
 
-nyTimesProp <- merge(nyTimesBeforeProp, nyTimesAfterProp, by = "topic")
+nyTimesProp <- merge(nyTimesBeforeProp, nyTimesAfterProp, by = "topic", all = TRUE)
 nyTimesProp$change <- nyTimesProp$propAfter - nyTimesProp$propBefore
 
-nyTimesProp %>%
-  select(topic, propBefore, propAfter, change) %>%
+## formatting
+
+propChange <- merge(wsjProp, nyTimesProp, by = "topic", all = TRUE)
+propChange[is.na(propChange)] <- 0
+
+fixNums <- function(x){
+  x <- x * 100
+  x <- round(x, 2)
+  return(x)
+}
+
+propChange <- propChange %>%
+  mutate_if(is.numeric, funs(fixNums))
+
+propChange <- propChange %>%
+  select(topic, propBefore.x, propAfter.x, change.x, 
+         propBefore.y, propAfter.y, change.y)
+
+propChange <- propChange %>%
+  rename(propBeforeWSJ = propBefore.x) 
+
+names(propChange) <- c("Topic", "BeforeWSJ", "AfterWSJ", "ChangeWSJ", 
+                       "BeforeNYT", "AfterNYT", "ChangeNYT")
+
+propChange %>%
   kable %>%
-  kable_styling()
+  kable_styling(bootstrap_options = "striped", full_width = FALSE) %>%
+  column_spec(1, bold = T, border_right = T) %>%
+  add_header_above(c(" " = 1, "Wall Street Journal" = 3, "New York Times" = 3)) %>%
+  footnote(general = "Proportion of each topic before and after the withdrawal from the Iran Nuclear Deal - May 7th to 8th, 2018")
+
+
+
