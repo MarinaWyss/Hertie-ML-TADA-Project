@@ -5,6 +5,10 @@ library(quanteda)
 library(topicmodels)
 library(tidytext)
 library(tidyr)
+library(ggplot2)
+library(plyr)
+library(kableExtra)
+library(extrafont)
 
 # loading small datasets
 wsjBaseline <- read.csv("wsjBaseline.csv")
@@ -14,109 +18,78 @@ wsjBaseline$text <- as.character(wsjBaseline$text)
 nyTimesBaseline$text <- as.character(nyTimesBaseline$text)
 
 
-# split data (70/30 - Train/Test)
-set.seed(123) 
-
-wsjIndex <- sample(1:nrow(wsjBaseline), round(nrow(wsjBaseline) * 0.7))
-wsjTrain <- wsjBaseline[wsjIndex, ]
-wsjTest  <- wsjBaseline[-wsjIndex, ]
-
-nyTimesIndex <- sample(1:nrow(nyTimesBaseline), round(nrow(nyTimesBaseline) * 0.7))
-nyTimesTrain <- nyTimesBaseline[nyTimesIndex, ]
-nyTimesTest  <- nyTimesBaseline[-nyTimesIndex, ]
-
-
 # WSJ pre-processing
-## train
-wsjTrainCorpus <- corpus(wsjTrain, text_field = "text", metacorpus = NULL, compress = FALSE)
-docvars(wsjTrainCorpus, "topic") <- wsjTrain$topic
+wsjCorpus <- corpus(wsjBaseline, text_field = "text", metacorpus = NULL, compress = FALSE)
 
-wsjTrainTokens <- wsjTrainCorpus %>%
+docvars(wsjCorpus, "topic") <- wsjBaseline$topic
+
+wsjTokens <- wsjCorpus %>%
   tokens(what = "word", 
          remove_url = TRUE, 
          remove_punct = TRUE, 
          remove_separators = TRUE, 
          remove_numbers = TRUE)
 
-wsjTrainTokens <- tokens_select(wsjTrainTokens, 
+wsjTokens <- tokens_select(wsjTokens, 
                              stopwords('english'), 
                              selection = 'remove')
 
-wsjTrainTokens <- tokens_wordstem(wsjTrainTokens)
+wsjTokens <- tokens_wordstem(wsjTokens)
 
-wsjTrainDfm <- dfm(wsjTrainTokens)
+wsjDfm <- dfm(wsjTokens)
 
-## test
-wsjTestCorpus <- corpus(wsjTest, text_field = "text", metacorpus = NULL, compress = FALSE)
-docvars(wsjTestCorpus, "topic") <- wsjTest$topic
 
-wsjTestTokens <- wsjTestCorpus %>%
-  tokens(what = "word", 
-         remove_url = TRUE, 
-         remove_punct = TRUE, 
-         remove_separators = TRUE, 
-         remove_numbers = TRUE)
+## split data (70/30 - Train/Test)
+set.seed(123) 
 
-wsjTestTokens <- tokens_select(wsjTestTokens, 
-                                stopwords('english'), 
-                                selection = 'remove')
+wsjsmp <- sample(c("train", "test"), size=ndoc(wsjCorpus), 
+                 prob=c(0.70, 0.30), replace=TRUE)
 
-wsjTestTokens <- tokens_wordstem(wsjTestTokens)
-
-wsjTestDfm <- dfm(wsjTestTokens)
+train <- which(wsjsmp == "train")
+test <- which(wsjsmp == "test")
 
 
 # NY Times pre-processing
-## train
-nyTimesTrainCorpus <- corpus(nyTimesTrain, text_field = "text", metacorpus = NULL, compress = FALSE)
-docvars(nyTimesTrainCorpus, "topic") <- nyTimesTrain$topic
+nyTimesCorpus <- corpus(nyTimesBaseline, text_field = "text", metacorpus = NULL, compress = FALSE)
+docvars(nyTimesCorpus, "topic") <- nyTimes$topic
 
-nyTimesTrainTokens <- nyTimesTrainCorpus %>%
+nyTimesTokens <- nyTimesCorpus %>%
   tokens(what = "word", 
          remove_url = TRUE, 
          remove_punct = TRUE, 
          remove_separators = TRUE, 
          remove_numbers = TRUE)
 
-nyTimesTrainTokens <- tokens_select(nyTimesTrainTokens, 
+nyTimesTokens <- tokens_select(nyTimesTokens, 
                                 stopwords('english'), 
                                 selection = 'remove')
 
-nyTimesTrainTokens <- tokens_wordstem(nyTimesTrainTokens)
+nyTimesTokens <- tokens_wordstem(nyTimesTokens)
 
-nyTimesTrainDfm <- dfm(nyTimesTrainTokens)
+nyTimesDfm <- dfm(nyTimesTokens)
 
-## test
-nyTimesTestCorpus <- corpus(nyTimesTest, text_field = "text", metacorpus = NULL, compress = FALSE)
-docvars(nyTimesTestCorpus, "topic") <- nyTimesTest$topic
+## split data (70/30 - Train/Test)
+set.seed(123) 
 
-nyTimesTestTokens <- nyTimesTestCorpus %>%
-  tokens(what = "word", 
-         remove_url = TRUE, 
-         remove_punct = TRUE, 
-         remove_separators = TRUE, 
-         remove_numbers = TRUE)
+nytsmp <- sample(c("train", "test"), size=ndoc(nyTimesCorpus), 
+                 prob=c(0.70, 0.30), replace=TRUE)
 
-nyTimesTestTokens <- tokens_select(nyTimesTestTokens, 
-                                    stopwords('english'), 
-                                    selection = 'remove')
+train <- which(nytsmp == "train")
+test <- which(nytsmp == "test")
 
-nyTimesTestTokens <- tokens_wordstem(nyTimesTestTokens)
-
-nyTimesTestDfm <- dfm(nyTimesTestTokens)
 
 
 # training Naive Bayes models
-wsjNB <- textmodel_nb(wsjTrainDfm, docvars(wsjTrainCorpus, "topic"))
-wsjPreds <- predict(wsjNB, newdata = wsjTestDfm)
+wsjNB <- textmodel_nb(wsjDfm[train,], docvars(wsjCorpus, "topic")[train])
+wsjPreds <- predict(wsjNB, newdata = wsjDfm[test,])
 
-nyTimesNB <- textmodel_nb(nyTimesTrainDfm, docvars(nyTimesTrainCorpus, "topic"))
-nyTimesPreds <- predict(nyTimesNB, newdata = nyTimesTestDfm)
+nyTimesNB <- textmodel_nb(nyTimesDfm[train,], docvars(nyTimesCorpus, "topic")[train])
+nyTimesPreds <- predict(nyTimesNB, newdata = nyTimesDfm[test,])
 
 
 # testing
-wsjCM <- table(wsjPreds, docvars(wsjTestCorpus, "topic"))
-nyTimesCM <- table(nyTimesPreds, docvars(nyTimesTestCorpus, "topic"))
+wsjCM <- table(wsjPreds, docvars(wsjCorpus, "topic")[test])
+nyTimesCM <- table(nyTimesPreds, docvars(nyTimesCorpus, "topic")[test])
 
 precrecall <- function(mytable, verbose=TRUE) {
   truePositives <- mytable[1,1]
@@ -141,7 +114,87 @@ sum(diag(nyTimesCM)) / sum(nyTimesCM)
 
 # distribution of topics
 
+## WSJ 
+
+# plots
+wsjBefore <- wsjBaseline %>%
+  filter(date == "2018:05:07") 
+
+wsjBeforePlot <- ggplot(aes(x = topic), data = wsjBefore) +
+  geom_bar(stat = "count", aes(fill = topic), color = "white") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        text = element_text(family="Times"))
+
+wsjAfter <- wsjBaseline %>%
+  filter(date == "2018:05:08") 
+
+wsjAfterPlot <- ggplot(aes(x = topic), data = wsjAfter) +
+  geom_bar(stat = "count", aes(fill = topic), color = "white") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        text = element_text(family="Times"))
+
+# proportions
+wsjBeforeProp <- wsjBefore %>%
+  group_by(topic) %>%
+  tally()
+
+wsjBeforeProp <- wsjBeforeProp %>%
+  mutate(propBefore = (n/sum(n))) 
+
+wsjAfterProp <- wsjAfter %>%
+  group_by(topic) %>%
+  tally()
+
+wsjAfterProp <- wsjAfterProp %>%
+  mutate(propAfter = (n/sum(n)))
+
+wsjProp <- merge(wsjBeforeProp, wsjAfterProp, by = "topic")
+wsjProp$change <- wsjProp$propAfter - wsjProp$propBefore
+
+wsjProp %>%
+  select(topic, propBefore, propAfter, change) %>%
+  kable %>%
+  kable_styling()
 
 
+## NY Times 
 
+# plots
+nyTimesBefore <- nyTimesBaseline %>%
+  filter(date == "2018:05:07") 
 
+nyTimesBeforePlot <- ggplot(aes(x = topic), data = nyTimesBefore) +
+  geom_bar(stat = "count", aes(fill = topic), color = "white") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        text = element_text(family="Times"))
+
+nyTimesAfter <- nyTimesBaseline %>%
+  filter(date == "2018:05:08") 
+
+nyTimesAfterPlot <- ggplot(aes(x = topic), data = nyTimesAfter) +
+  geom_bar(stat = "count", aes(fill = topic), color = "white") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        text = element_text(family="Times"))
+
+# proportions
+nyTimesBeforeProp <- nyTimesBefore %>%
+  group_by(topic) %>%
+  tally()
+
+nyTimesBeforeProp <- nyTimesBeforeProp %>%
+  mutate(propBefore = (n/sum(n))) 
+
+nyTimesAfterProp <- nyTimesAfter %>%
+  group_by(topic) %>%
+  tally()
+
+nyTimesAfterProp <- nyTimesAfterProp %>%
+  mutate(propAfter = (n/sum(n)))
+
+nyTimesProp <- merge(nyTimesBeforeProp, nyTimesAfterProp, by = "topic")
+nyTimesProp$change <- nyTimesProp$propAfter - nyTimesProp$propBefore
+
+nyTimesProp %>%
+  select(topic, propBefore, propAfter, change) %>%
+  kable %>%
+  kable_styling()
