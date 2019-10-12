@@ -83,36 +83,31 @@ testNYT <- which(nytsmp == "test")
 
 # training Naive Bayes models
 wsjNB <- textmodel_nb(wsjDfm[trainWSJ, ], docvars(wsjCorpus, "topic")[trainWSJ])
-wsjPreds <- predict(wsjNB, newdata = wsjDfm[testWSJ,])
+wsjPreds <- data.frame(predict(wsjNB, newdata = wsjDfm[testWSJ,]))
 
 nyTimesNB <- textmodel_nb(nyTimesDfm[trainNYT,], docvars(nyTimesCorpus, "topic")[trainNYT])
-nyTimesPreds <- predict(nyTimesNB, newdata = nyTimesDfm[testNYT,])
+nyTimesPreds <- data.frame(predict(nyTimesNB, newdata = nyTimesDfm[testNYT,]))
 
 
 # testing
-wsjCM <- table(wsjPreds, docvars(wsjCorpus, "topic")[testWSJ])
-nyTimesCM <- table(nyTimesPreds, docvars(nyTimesCorpus, "topic")[testNYT])
+trueTestWSJ <- (wsjBaseline[testWSJ, ])
+trueTestWSJ <- data.frame(trueTestWSJ$topic)
+trueTestWSJ$prediction <- wsjPreds$predict.wsjNB..newdata...wsjDfm.testWSJ....
+levels(trueTestWSJ$prediction) <- levels(trueTestWSJ$trueTestWSJ.topic)
+trueTestWSJ$accurate <- ifelse(trueTestWSJ$trueTestWSJ.topic == trueTestWSJ$prediction, 1, 0)
 
-precrecall <- function(mytable, verbose=TRUE) {
-  truePositives <- mytable[1,1]
-  falsePositives <- sum(mytable[1,]) - truePositives
-  falseNegatives <- sum(mytable[,1]) - truePositives
-  precision <- truePositives / (truePositives + falsePositives)
-  recall <- truePositives / (truePositives + falseNegatives)
-  if (verbose) {
-    print(mytable)
-    cat("\n precision =", round(precision, 2), 
-        "\n    recall =", round(recall, 2), "\n")
-  }
-  invisible(c(precision, recall))
-}
+## accuracy WSJ
+accuracyWSJ <- (sum(trueTestWSJ$accurate) / nrow(trueTestWSJ))
 
-precrecall(wsjCM)
-sum(diag(wsjCM)) / sum(wsjCM)
 
-precrecall(nyTimesCM)
-sum(diag(nyTimesCM)) / sum(nyTimesCM)
+trueTestNYT <- (nyTimesBaseline[testNYT, ])
+trueTestNYT <- data.frame(trueTestNYT$topic)
+trueTestNYT$prediction <- nyTimesPreds$predict.nyTimesNB..newdata...nyTimesDfm.testNYT....
+levels(trueTestNYT$prediction) <- levels(trueTestNYT$trueTestNYT.topic)
+trueTestNYT$accurate <- ifelse(trueTestNYT$trueTestNYT.topic == trueTestNYT$prediction, 1, 0)
 
+## accuracy NYT
+accuracyNYT <- (sum(trueTestNYT$accurate) / nrow(trueTestNYT))
 
 # distribution of topics
 
