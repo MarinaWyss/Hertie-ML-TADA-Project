@@ -15,6 +15,7 @@ wsjBaseline <- read.csv("wsjBaseline.csv")
 nyTimesBaseline <- read.csv("nyTimesBaseline.csv")
 
 wsjBaseline$text <- as.character(wsjBaseline$text)
+wsjBaseline$topic <- tolower(wsjBaseline$topic)
 nyTimesBaseline$text <- as.character(nyTimesBaseline$text)
 nyTimesBaseline$topic <- tolower(nyTimesBaseline$topic)
 
@@ -217,9 +218,6 @@ propChange <- propChange %>%
 propChange <- propChange %>%
   select(topic, propBefore.x, propAfter.x, change.x, 
          propBefore.y, propAfter.y, change.y)
-
-propChange <- propChange %>%
-  rename(propBeforeWSJ = propBefore.x) 
 
 names(propChange) <- c("Topic", "BeforeWSJ", "AfterWSJ", "ChangeWSJ", 
                        "BeforeNYT", "AfterNYT", "ChangeNYT")
