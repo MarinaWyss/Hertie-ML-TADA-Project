@@ -1,5 +1,5 @@
 # load packages
-library(dplyr)
+library(tidyverse)
 library(stringr)
 library(stringi)
 library(tidyr)
@@ -36,28 +36,21 @@ fullDataSet <- fullDataSet %>% select(-datetime)
 
 ## limit time period for baseline
 fullDataSet <- fullDataSet %>%
-  filter(date >= "2018:10:01" & date <= "2018:10:07")
+  filter(date >= "2018:10:01" & date <= "2018:11:01")
 
-# create variables for day of the year and week of the year
-## add week label column
+# create variables for day of the year 
 fullDataSet$date <- str_replace_all(fullDataSet$date, ":", "-")
 fullDataSet$date <- as.Date(fullDataSet$date)
 
 fullDataSet <- fullDataSet %>% 
-  mutate(week = cut.Date(fullDataSet$date, breaks = "1 week", labels = FALSE, start.on.monday = FALSE)) %>% 
-  arrange(fullDataSet$date)
-
-## add day label column
-fullDataSet <- fullDataSet %>% 
-  mutate(day = cut.Date(fullDataSet$date, breaks = "day", labels = FALSE)) %>% 
-  arrange(fullDataSet$date)
+  mutate(dayOfYear = strftime(date, format = "%j"))
 
 # add column with outlet and date
 fullDataSet$outlet_date = stri_join(fullDataSet$outlet,fullDataSet$date,sep="_")
 
 # create a corpus and dfm
-newsCorpus <- corpus(fullDataSet)
-summary(newsCorpus, 5)
+newsCorpus <- corpus(fullDataSet) 
+
 
 ## tokenize by word, pre-process, create dfm
 newsTokens <- newsCorpus %>%
@@ -74,21 +67,46 @@ newsTokens <- tokens_remove(newsTokens,
 newsTokens <- tokens_remove(newsTokens,
                                 c("said", "like"))
 
+# filtering articles with tokens relating to guns
+gunWords <- c("gun", "shooting", "gunman", "shooter", 
+              "guns", "second amendment", 
+              "2nd amendment", "firearm", "firearms",
+              "NRA", "National Rifle Association")
+
+newsTokens <- keep(newsTokens, ~ any(gunWords %in% .x))
+
+# filtering docvars
+filteredNames <- names(newsTokens)
+rowsToKeep <- as.numeric(substr(filteredNames, start = 5, stop = 100))
+fullDataSet$docNumber <- 1:length(fullDataSet$outlet)
+filteredDataSet <- subset(fullDataSet, docNumber %in% rowsToKeep)
+
+newsCorpusFiltered <- corpus(filteredDataSet) 
+docvars(newsCorpusFiltered, "outlet_date") <- filteredDataSet$outlet_date
+
+
+# create DFM
+
 newsDfm <- dfm(newsTokens)
 
 # trim dfm to use in stm function (min 7.5% / max 95%)
 newsDfm <- dfm_trim(newsDfm, min_docfreq = 0.075, max_docfreq = 0.90, docfreq_type = "prop") 
 
 # convert quanteda dfm to documents in stm form
-newsConvert <- convert(newsDfm, to = "stm")
+newsConvert <- convert(newsDfm, to = "stm", docvars = docvars(newsCorpusFiltered))
 
 # run the stm
-topic.count <- 40
-newsStm<- stm(newsConvert$documents, newsConvert$vocab, K = topic.count, data = newsConvert$meta, init.type = "Spectral")
+topic.count <- 10
+newsStm <- stm(newsConvert$documents, 
+              newsConvert$vocab, 
+              K = topic.count, 
+              data = newsConvert$meta, 
+              init.type = "Spectral")
+
 data.frame(t(labelTopics(newsStm, n = 10)$prob))
 
 # plot the results
-plot(newsStm, type = "perspectives", topics = c(12, 20))
+plot(newsStm, type = "perspectives", topics = c(0, 2))
 
 
 
