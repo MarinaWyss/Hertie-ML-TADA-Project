@@ -6,6 +6,7 @@ library(tidyr)
 library(quanteda)
 library(stm)
 library(tools)
+library(tidytext)
 
 # your filepath here
 path <- "/Users/Jan/Desktop/Marina/Hertie-ML-TADA-Project/newspaper-data/English/finalFiles"
@@ -67,7 +68,7 @@ fullDataSet <- fullDataSet %>%
   mutate(dayOfYear = strftime(date, format = "%j"))
 
 ## add column with outlet and date
-fullDataSet$outlet_date = stri_join(fullDataSet$outlet,fullDataSet$date,sep="_")
+fullDataSet$outlet_date = stri_join(fullDataSet$outlet, fullDataSet$date,sep="_")
 
 ## create a corpus and dfm
 newsCorpus <- corpus(fullDataSet) 
@@ -133,7 +134,7 @@ plot(kresult)
 
 
 # run the stm
-topic.count <- 25
+topic.count <- 15
 newsStm <- stm(newsConvert$documents, 
               newsConvert$vocab, 
               K = topic.count, 
@@ -154,5 +155,16 @@ effect <- estimateEffect(formula = 1:20 ~ outlet_date, stmobj = newsStm,
                          metadata = newsConvert$meta, uncertainty = "Global")
 
 summary(effect, topics = 1)
+
+
+# docvars and topic frequencies
+probabilities <- tidy(newsStm, matrix = "gamma", document_names = names(newsTokens))
+
+joinedDataSet <- cbind(probabilities, filteredDataSet$outlet_date)
+joinedDataSet <- joinedDataSet %>% 
+  rename(outlet_date = `filteredDataSet$outlet_date`) %>% 
+  separate(outlet_date, into = c("outlet", "date"), sep = "_")
+
+joinedDataSetWide <- reshape(joinedDataSet, idvar = "document", timevar = "topic", direction = "wide")
 
 
