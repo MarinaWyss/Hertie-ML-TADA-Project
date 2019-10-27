@@ -10,18 +10,16 @@ library(tools)
 # your filepath here
 path <- "/Users/Jan/Desktop/Marina/Hertie-ML-TADA-Project/newspaper-data/English/finalFiles"
 
-
-# create list of all outlets
+# load data
+## create list of all outlets
 filenamesList <- list.files(path = path, full.names = TRUE)
 
-
-# load all .Rdata files
+## load all .Rdata files
 for (i in 1:length(filenamesList)) {
   load(filenamesList[i])
 }
 
-
-# creating a character vector of the dataframe names
+## creating a character vector of the dataframe names
 newsNames <- file_path_sans_ext(basename(filenamesList))
 newsNames <- word(newsNames, 1, sep = "_")
 newsNames <- paste0(newsNames, "_df")
@@ -88,11 +86,15 @@ newsTokens <- tokens_remove(newsTokens,
                                 min_nchar = 3L)
 
 newsTokens <- tokens_remove(newsTokens,
-                                c("said", "say", "says", "like", "p.m.", "a.m."))
+                                c("said", "say", "says", "like", 
+                                  "p.m.", "a.m.", "donâ", "itâ"))
+
+newsTokens <- tokens_wordstem(newsTokens)
+
 
 ## filtering articles with tokens relating to guns
 gunWords <- c("gun", "shooting", "gunman", "shooter", 
-              "guns", "second amendment", 
+              "guns", "second amendment", "shoot", 
               "2nd amendment", "firearm", "firearms",
               "NRA", "National Rifle Association")
 
@@ -112,11 +114,15 @@ docvars(newsCorpusFiltered, "outlet_date") <- filteredDataSet$outlet_date
 newsDfm <- dfm(newsTokens)
 
 ## trim dfm to use in stm function (min 7.5% / max 95%)
-newsDfm <- dfm_trim(newsDfm, min_docfreq = 0.075, max_docfreq = 0.90, docfreq_type = "prop") 
+newsDfm <- dfm_trim(newsDfm, 
+                    min_docfreq = 0.075, 
+                    max_docfreq = 0.90, 
+                    docfreq_type = "prop") 
 
 
 # convert quanteda dfm to documents in stm form
-newsConvert <- convert(newsDfm, to = "stm", docvars = docvars(newsCorpusFiltered))
+newsConvert <- convert(newsDfm, to = "stm", 
+                       docvars = docvars(newsCorpusFiltered))
 
 
 # find the ideal number of topics
@@ -127,7 +133,7 @@ plot(kresult)
 
 
 # run the stm
-topic.count <- 20
+topic.count <- 25
 newsStm <- stm(newsConvert$documents, 
               newsConvert$vocab, 
               K = topic.count, 
@@ -138,7 +144,7 @@ newsStm <- stm(newsConvert$documents,
 # view results
 data.frame(t(labelTopics(newsStm, n = 10)$prob))
 
-labelTopics(newsStm, c(1:20))
+labelTopics(newsStm, c(1:25))
 
 plot(newsStm, type = "summary", topics = c(1:10), xlim = c(0, 10))
 
