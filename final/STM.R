@@ -5,6 +5,27 @@ library(stringi)
 library(tidyr)
 library(quanteda)
 library(stm)
+library(tools)
+
+# your filepath here
+path <- "/Users/Jan/Desktop/Marina/Hertie-ML-TADA-Project/newspaper-data/English/finalFiles"
+
+
+# create list of all outlets
+filenamesList <- list.files(path = path, full.names = TRUE)
+
+
+# load all .Rdata files
+for (i in 1:length(filenamesList)) {
+  load(filenamesList[i])
+}
+
+
+# creating a character vector of the dataframe names
+newsNames <- file_path_sans_ext(basename(filenamesList))
+newsNames <- word(newsNames, 1, sep = "_")
+newsNames <- paste0(newsNames, "_df")
+
 
 # merge dataset
 breitbart_df$text <- as.character(breitbart_df$text)
@@ -16,7 +37,8 @@ wsj_df$text <- as.character(wsj_df$text)
 wsj_df <- wsj_df %>% select(-section, -paywall)
 foxnews_df$topic_tags <- "NA"
 
-fullDataSet <-  rbind(breitbart_df, foxnews_df, nytimes_df, thinkprogress_df, wsj_df)
+fullDataSet <-  do.call("rbind", lapply(newsNames, get))
+
 
 # filter for sports
 fullDataSet <- fullDataSet %>%
@@ -28,6 +50,7 @@ fullDataSet <- fullDataSet %>%
            domain != "Tennis" &
            domain != "Pro Football")
 
+
 # pre-processing
 ## split the datetime column into two
 fullDataSet$time <- format(as.POSIXct(fullDataSet$datetime, format="%Y:%m:%d %H:%M:%S"), "%H:%M:%S")
@@ -36,19 +59,19 @@ fullDataSet <- fullDataSet %>% select(-datetime)
 
 ## limit time period for baseline
 fullDataSet <- fullDataSet %>%
-  filter(date >= "2018:10:01" & date <= "2018:11:01")
+  filter(date >= "2018:10:01" & date <= "2018:11:30")
 
-# create variables for day of the year 
+## create variables for day of the year 
 fullDataSet$date <- str_replace_all(fullDataSet$date, ":", "-")
 fullDataSet$date <- as.Date(fullDataSet$date)
 
 fullDataSet <- fullDataSet %>% 
   mutate(dayOfYear = strftime(date, format = "%j"))
 
-# add column with outlet and date
+## add column with outlet and date
 fullDataSet$outlet_date = stri_join(fullDataSet$outlet,fullDataSet$date,sep="_")
 
-# create a corpus and dfm
+## create a corpus and dfm
 newsCorpus <- corpus(fullDataSet) 
 
 
@@ -65,9 +88,9 @@ newsTokens <- tokens_remove(newsTokens,
                                 min_nchar = 3L)
 
 newsTokens <- tokens_remove(newsTokens,
-                                c("said", "like"))
+                                c("said", "say", "says", "like", "p.m.", "a.m."))
 
-# filtering articles with tokens relating to guns
+## filtering articles with tokens relating to guns
 gunWords <- c("gun", "shooting", "gunman", "shooter", 
               "guns", "second amendment", 
               "2nd amendment", "firearm", "firearms",
@@ -75,7 +98,7 @@ gunWords <- c("gun", "shooting", "gunman", "shooter",
 
 newsTokens <- keep(newsTokens, ~ any(gunWords %in% .x))
 
-# filtering docvars
+## filtering docvars
 filteredNames <- names(newsTokens)
 rowsToKeep <- as.numeric(substr(filteredNames, start = 5, stop = 100))
 fullDataSet$docNumber <- 1:length(fullDataSet$outlet)
@@ -86,35 +109,44 @@ docvars(newsCorpusFiltered, "outlet_date") <- filteredDataSet$outlet_date
 
 
 # create DFM
-
 newsDfm <- dfm(newsTokens)
 
-# trim dfm to use in stm function (min 7.5% / max 95%)
+## trim dfm to use in stm function (min 7.5% / max 95%)
 newsDfm <- dfm_trim(newsDfm, min_docfreq = 0.075, max_docfreq = 0.90, docfreq_type = "prop") 
+
 
 # convert quanteda dfm to documents in stm form
 newsConvert <- convert(newsDfm, to = "stm", docvars = docvars(newsCorpusFiltered))
 
+
+# find the ideal number of topics
+set.seed(123)
+K <- c(5, 10, 15, 20, 25, 30, 35, 40) 
+kresult <- searchK(newsConvert$documents, newsConvert$vocab, K, init.type = "Spectral")
+plot(kresult)
+
+
 # run the stm
-topic.count <- 10
+topic.count <- 20
 newsStm <- stm(newsConvert$documents, 
               newsConvert$vocab, 
               K = topic.count, 
               data = newsConvert$meta, 
               init.type = "Spectral")
 
+
+# view results
 data.frame(t(labelTopics(newsStm, n = 10)$prob))
 
-# plot the results
-plot(newsStm, type = "perspectives", topics = c(0, 2))
+labelTopics(newsStm, c(1:20))
 
-
-
-# find the ideal number of topics
+plot(newsStm, type = "summary", topics = c(1:10), xlim = c(0, 10))
 
 
 # estimate topic relationships
-#estimateEffect()
+effect <- estimateEffect(formula = 1:20 ~ outlet_date, stmobj = newsStm,
+                         metadata = newsConvert$meta, uncertainty = "Global")
 
+summary(effect, topics = 1)
 
 
