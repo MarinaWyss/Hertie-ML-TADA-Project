@@ -9,7 +9,7 @@ library(tools)
 library(tidytext)
 
 # your filepath here
-path <- "/Users/Jan/Desktop/Marina/Hertie-ML-TADA-Project/newspaper-data/English/finalFiles"
+path <- "/Users/marinabennett/Desktop/Hertie/1. Fall 2019/Machine Learning/Hertie-ML-TADA-Project/newspaper-data/English/finalFiles"
 
 # load data
 ## create list of all outlets
@@ -58,7 +58,7 @@ fullDataSet <- fullDataSet %>% select(-datetime)
 
 ## limit time period for baseline
 fullDataSet <- fullDataSet %>%
-  filter(date >= "2018:10:01" & date <= "2018:11:30")
+  filter(date >= "2018:10:01" & date <= "2018:10:08")
 
 ## create variables for day of the year 
 fullDataSet$date <- str_replace_all(fullDataSet$date, ":", "-")
@@ -88,7 +88,7 @@ newsTokens <- tokens_remove(newsTokens,
 
 newsTokens <- tokens_remove(newsTokens,
                                 c("said", "say", "says", "like", 
-                                  "p.m.", "a.m.", "donâ", "itâ"))
+                                  "p.m.", "a.m.", "don?", "it?"))
 
 newsTokens <- tokens_wordstem(newsTokens)
 
@@ -161,10 +161,13 @@ summary(effect, topics = 1)
 probabilities <- tidy(newsStm, matrix = "gamma", document_names = names(newsTokens))
 
 joinedDataSet <- cbind(probabilities, filteredDataSet$outlet_date)
-joinedDataSet <- joinedDataSet %>% 
+
+preppedDataSet <- joinedDataSet %>% 
   rename(outlet_date = `filteredDataSet$outlet_date`) %>% 
-  separate(outlet_date, into = c("outlet", "date"), sep = "_")
+  separate(outlet_date, into = c("outlet", "date"), sep = "_") %>% 
+  group_by(document) %>% 
+  filter(gamma == max(gamma)) %>% 
+  arrange(date)
 
-joinedDataSetWide <- reshape(joinedDataSet, idvar = "document", timevar = "topic", direction = "wide")
 
-
+  
