@@ -58,7 +58,7 @@ fullDataSet <- fullDataSet %>% select(-datetime)
 
 ## limit time period for baseline
 fullDataSet <- fullDataSet %>%
-  filter(date >= "2018:10:01" & date <= "2018:10:08")
+  filter(date >= "2018:10:01" & date <= "2018:11:30")
 
 ## create variables for day of the year 
 fullDataSet$date <- str_replace_all(fullDataSet$date, ":", "-")
@@ -90,7 +90,7 @@ newsTokens <- tokens_remove(newsTokens,
                                 c("said", "say", "says", "like", 
                                   "p.m.", "a.m.", "don?", "it?"))
 
-newsTokens <- tokens_wordstem(newsTokens)
+# newsTokens <- tokens_wordstem(newsTokens)
 
 
 ## filtering articles with tokens relating to guns
@@ -128,13 +128,13 @@ newsConvert <- convert(newsDfm, to = "stm",
 
 # find the ideal number of topics
 set.seed(123)
-K <- c(5, 10, 15, 20, 25, 30, 35, 40) 
+K <- c(5:15) 
 kresult <- searchK(newsConvert$documents, newsConvert$vocab, K, init.type = "Spectral")
 plot(kresult)
 
 
 # run the stm
-topic.count <- 15
+topic.count <- 14
 newsStm <- stm(newsConvert$documents, 
               newsConvert$vocab, 
               K = topic.count, 
@@ -143,9 +143,9 @@ newsStm <- stm(newsConvert$documents,
 
 
 # view results
-data.frame(t(labelTopics(newsStm, n = 10)$prob))
+data.frame(t(labelTopics(newsStm, n = 20)$prob))
 
-labelTopics(newsStm, c(1:25))
+labelTopics(newsStm, c(1:14))
 
 plot(newsStm, type = "summary", topics = c(1:10), xlim = c(0, 10))
 
@@ -168,6 +168,3 @@ preppedDataSet <- joinedDataSet %>%
   group_by(document) %>% 
   filter(gamma == max(gamma)) %>% 
   arrange(date)
-
-
-  
