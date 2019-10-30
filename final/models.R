@@ -5,7 +5,9 @@ library(tidyverse)
 fullDataSet <- read.csv("preppedDataSet.csv")
 demographics <- read.csv("demoData.csv")
 
-fullDataSet$date <- as.Date(fullDataSet$date)
+fullDataSet <- fullDataSet %>% 
+  mutate(date = as.Date(date),
+         topic = as.factor(topic))
 
 demographics <- demographics %>% 
   mutate(date = as.Date(date),
@@ -26,7 +28,7 @@ demographics <- demographics %>%
 joinedDataSet <- left_join(fullDataSet, demographics) %>% 
   fill(c(6:15), .direction = c("down"))
 
-
+str(joinedDataSet)
 
 ### Naive Bayes practice ###
 practiceData <- filteredDataSet %>% 
