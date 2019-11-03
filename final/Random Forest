@@ -1,0 +1,370 @@
+### Machine Learning Application of Demographic data on Gun Violence in U.S. ####
+
+# load packages
+install.packages("caret")
+install.packages("ranger")
+install.packages("h2o")
+install.packages("rsample")
+install.packages("dplyr")    # alternative installation of the %>%
+library(caret)
+library(dplyr)    # for data wrangling
+library(ggplot2)  # for awesome graphics
+library(rsample)
+library(ranger)   # for a fast c++ implementation of random forest 
+library(h2o)
+library(dplyr)
+library(tidyverse)
+
+install.packages("e1071")
+library(e1071)
+
+install.packages("randomForest")
+library(randomForest)
+install.packages("mlbench")
+library(mlbench)
+
+# h2o set-up 
+h2o.no_progress()  # turn off h2o progress bars
+h2o.init()         # launch h2o
+
+# your filepath here
+path <- "/Users/AEMagaard/Documents/Hertie/Semester 3/Text Analysis/Project/Hertie-ML-TADA-Project-master"
+
+# adding independent variables to data set
+fullDataSet <- read.csv("preppedDataSet.csv")
+demographics <- read.csv("demoData.csv")
+
+fullDataSet <- fullDataSet %>% 
+  mutate(date = as.Date(date),
+         topic = as.factor(topic))
+
+demographics <- demographics %>% 
+  mutate(date = as.Date(date),
+         children = as.factor(ifelse(children == "Yes", 1, 0)),
+         murderSuicide = as.factor(ifelse(murderSuicide == "Yes", 1, 0)),
+         countyVote = as.factor(ifelse(countyVote == "Yes", 1, 0)),
+         majorityRace = as.factor(case_when(
+           majorityRace == "White" ~ 1,
+           majorityRace == "Black" ~ 2,
+           majorityRace == "Latino" ~ 3,
+           majorityRace == "Asian" ~ 4,
+           majorityRace == "American Indian" ~ 5)),
+         medianIncome = as.numeric(medianIncome),
+         medianIncome = log(medianIncome),
+         zip = as.factor(zip)
+  )
+
+joinedDataSet <- left_join(fullDataSet, demographics) %>% 
+  fill(c(6:15), .direction = c("down"))
+str(joinedDataSet)
+
+
+#downsampling the data 
+
+balancedData <- downSample(x = joinedDataSet[, -1],
+                           y = joinedDataSet$topic)
+
+#split data into training and test 
+#using simple random sampling using caret package
+
+set.seed(123)  # for reproducibility
+index_3 <- createDataPartition(balancedData$topic, p = 0.7, 
+                               list = FALSE)
+train.1 <- joinedDataSet[index_3, ]
+test.1  <- joinedDataSet[-index_3, ]
+
+# view the first 6 rows of the downsampled, training data
+head(train.1)
+
+##document topic     gamma    outlet       date          location   zip
+#1    text2     1 0.3667261 breitbart 2018-10-01 Chicago, Illinois 60632
+#2   text78     1 0.4987770 breitbart 2018-10-01 Chicago, Illinois 60632
+#4   text41     2 0.9208401 breitbart 2018-10-01 Chicago, Illinois 60632
+#6 text4633     2 0.2815031   foxnews 2018-10-01 Chicago, Illinois 60632
+#7 text4636     2 0.8156081   foxnews 2018-10-01 Chicago, Illinois 60632
+#8 text4650     2 0.7551036   foxnews 2018-10-01 Chicago, Illinois 60632
+#medianIncome majorityRace countyVote dead injusted total children
+#1     3.496508            1          0    2        2     4        0
+#2     3.496508            1          0    2        2     4        0
+#4     3.496508            1          0    2        2     4        0
+#6     3.496508            1          0    2        2     4        0
+#7     3.496508            1          0    2        2     4        0
+#8     3.496508            1          0    2        2     4        0
+#murderSuicide
+#1             0
+#2             0
+#4             0
+#6             0
+#7             0
+#8             0
+
+## first default random forest model using the caret package
+
+#cross-validaton, with 10 folds repeat 3 times
+control <- trainControl(method='repeatedcv', 
+                        number=10, 
+                        repeats=3)
+
+#Metric compare model is Accuracy
+metric <- "Accuracy"
+set.seed(123)
+
+#Number randomely variable selected is mtry
+mtry <- sqrt(ncol(train.1))
+tunegrid <- expand.grid(.mtry=mtry)
+
+rf_default <- train(topic~., 
+                    data=train.1, #uses downsampled, split train data
+                    method='rf', 
+                    metric='Accuracy', 
+                    tuneGrid=tunegrid, 
+                    trControl=control)
+print(rf_default)
+
+# Random Forest 
+
+#784 samples
+#14 predictor
+#14 classes: '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14' 
+
+#No pre-processing
+#Resampling: Cross-Validated (10 fold, repeated 3 times) 
+#Summary of sample sizes: 702, 708, 705, 706, 706, 706, ... 
+#Resampling results:
+  
+#  Accuracy  Kappa
+#0.190108  0    
+
+#Tuning parameter 'mtry' was held constant at a value of 3.872983
+
+
+## second try using the following code from ML session 4, - runs Random Forest on h2o package
+## alex was not able to successfully download h2o package and run this, but including the code
+## in case another group member is able and this creates better results.
+
+set.seed(42)
+index <- createDataPartition(joinedDataSet$topic, p = 0.7, list = FALSE)
+train_data <- bc_data[index, ]
+test_data  <- bc_data[-index, ]
+
+set.seed(42)
+model_rf <- caret::train(classes ~ .,
+                         data = train_data,
+                         method = "rf",
+                         preProcess = c("scale", "center"),
+                         trControl = trainControl(method = "repeatedcv", 
+                                                  number = 10, 
+                                                  repeats = 10, 
+                                                  verboseIter = FALSE))
+
+
+# number of features
+n_features <- length(setdiff(names(train), "topic"))
+
+# add OOB error to grid
+hyper_grid$OOB_RMSE[i] <- sqrt(model$prediction.error)
+
+
+hyper_grid %>% 
+  dplyr::arrange(OOB_RMSE) %>%
+  head(10)
+
+### code from slava
+# train a default random forest model 2
+default.rf1 <- ranger(
+  topic ~ ., 
+  data = joinedDataSet,
+  mtry = floor(n_features / 3),
+  respect.unordered.factors = "order",
+  seed = 123
+)
+
+# get the Out of Bag RMSE (error)
+(default_rmse <- sqrt(default.rf1$prediction.error))
+## [1] 0.1978777 
+# note: low leval of error (?)
+
+# create 
+hyper_grid <- expand.grid(
+  mtry = floor(n_features * c(.05, .15, .25, .333, .4)),  # split rule
+  min.node.size = c(1, 3, 5, 10),                         # tree complexity
+  replace = c(TRUE, FALSE),                               # sampling scheme
+  sample.fraction = c(.5, .63, .8),                       # sampling scheme
+  rmse = NA                                               # results placeholder
+)
+
+# execute full cartesian grid search
+for(i in seq_len(nrow(hyper_grid))) {
+  # fit model for ith hyperparameter combination
+  fit <- ranger(
+    formula         = topic ~ ., 
+    data            = joinedDataSet, 
+    num.trees       = n_features * 10,
+    mtry            = hyper_grid$mtry[i],
+    min.node.size   = hyper_grid$min.node.size[i],
+    replace         = hyper_grid$replace[i],
+    sample.fraction = hyper_grid$sample.fraction[i],
+    verbose         = FALSE,
+    seed            = 123,
+    respect.unordered.factors = 'order',
+  )
+  
+# export OOB error 
+  hyper_grid$rmse[i] <- sqrt(fit$prediction.error)
+}
+
+# assess top 10 models
+hyper_grid %>%
+  arrange(rmse) %>%
+  mutate(perc_gain = (default_rmse - rmse) / default_rmse * 100) %>%
+  head(10)
+##   mtry min.node.size replace sample.fraction      rmse perc_gain
+#1     6             1    TRUE            0.80 0.1330607  32.75612
+#2     6             1   FALSE            0.80 0.1417340  28.37295
+#3     6             3    TRUE            0.80 0.1441162  27.16905
+#4     6             1    TRUE            0.50 0.1464598  25.98473
+#5     6             1   FALSE            0.50 0.1499063  24.24295
+#6     6             3   FALSE            0.63 0.1499063  24.24295
+#7     6             5    TRUE            0.80 0.1499063  24.24295
+#8     6             1   FALSE            0.63 0.1510377  23.67119
+#9     6             3   FALSE            0.50 0.1521607  23.10368
+#10    6             1    TRUE            0.63 0.1521607  23.10368
+
+
+h2o.no_progress()
+h2o.init(max_mem_size = "5g")
+
+
+# convert training data to h2o object
+train_h2o <- as.h2o(train)
+
+# set the response column to Topic
+response <- "Topic"
+
+# set the predictor names
+predictors <- setdiff(colnames(train), response)
+
+
+h2o_rf1 <- h2o.randomForest(
+  x = predictors, 
+  y = response,
+  training_frame = train_h2o, 
+  ntrees = n_features * 10,
+  seed = 123
+)
+
+#running random forest model using h20 (from slava ML session 4)
+
+h2o_rf1
+## Model Details:
+## ==============
+## 
+## H2ORegressionModel: drf
+
+
+# hyperparameter grid
+hyper_grid <- list(
+  mtries = floor(n_features * c(.05, .15, .25, .333, .4)),
+  min_rows = c(1, 3, 5, 10),
+  max_depth = c(10, 20, 30),
+  sample_rate = c(.55, .632, .70, .80)
+)
+
+# random grid search strategy
+search_criteria <- list(
+  strategy = "RandomDiscrete",
+  stopping_metric = "mse",
+  stopping_tolerance = 0.001,   # stop if we don't experience 0.1% improvement
+  stopping_rounds = 10,         # over the last 10 models
+  max_runtime_secs = 60*10      # or cut grid search off at 10 minutes
+)
+
+
+# perform grid search 
+random_grid <- h2o.grid(
+  algorithm = "randomForest",
+  grid_id = "rf_random_grid",
+  x = predictors, 
+  y = response, 
+  training_frame = train_h2o,
+  hyper_params = hyper_grid,
+  ntrees = n_features * 10,
+  seed = 123,
+  stopping_metric = "RMSE",   
+  stopping_rounds = 10,           # stop adding trees if we don't experience
+  stopping_tolerance = 0.005,     # 0.05 improvement in error over last 10 trees
+  search_criteria = search_criteria
+)
+
+
+# collect the results and sort by our model performance metric of choice
+random_grid_perf <- h2o.getGrid(
+  grid_id = "rf_random_grid", 
+  sort_by = "mse", 
+  decreasing = FALSE
+)
+## H2O Grid Details
+## ================
+## 
+## Grid ID: rf_random_grid 
+## Used hyper parameters: 
+##   -  max_depth 
+##   -  min_rows 
+##   -  mtries 
+##   -  sample_rate 
+## Number of models: 129 
+## Number of failed models: 0 
+## 
+## Hyper-Parameter Search Summary: ordered by increasing mse
+##   max_depth min_rows mtries sample_rate                 model_ids                 mse
+## 1        30      1.0     20         0.8  rf_random_grid_model_113 5.727214331253618E8
+## 2        20      1.0     20         0.8   rf_random_grid_model_39 5.727741137204964E8
+## 3        20      1.0     32         0.7    rf_random_grid_model_8  5.76799145123527E8
+## 4        30      1.0     26         0.7   rf_random_grid_model_67 5.815643260591004E8
+## 5        30      1.0     12         0.8   rf_random_grid_model_64 5.951710701891141E8
+## 
+## ---
+##     max_depth min_rows mtries sample_rate                model_ids                  mse
+## 124        10     10.0      4         0.7  rf_random_grid_model_44 1.0367731339073703E9
+## 125        20     10.0      4         0.8  rf_random_grid_model_73 1.0451421787520385E9
+## 126        20      5.0      4        0.55  rf_random_grid_model_12 1.0710840266353173E9
+## 127        10      5.0      4        0.55  rf_random_grid_model_75 1.0793293549247448E9
+## 128        10     10.0      4       0.632  rf_random_grid_model_37 1.0804801985871077E9
+## 129        20     10.0      4        0.55  rf_random_grid_model_22 1.1525799087784908E9
+
+
+# re-run model with impurity-based variable importance
+rf_impurity <- ranger(
+  formula = Topic ~ ., 
+  data = train, 
+  num.trees = 2000,
+  mtry = 26,
+  min.node.size   = 1,
+  sample.fraction = .80,
+  replace = FALSE,
+  importance = "impurity",
+  respect.unordered.factors = "order",
+  verbose = FALSE,
+  seed  = 123
+)
+
+# re-run model with permutation-based variable importance
+rf_permutation <- ranger(
+  formula = Topic ~ ., 
+  data = train, 
+  num.trees = 2000,
+  mtry = 26,
+  min.node.size   = 1,
+  sample.fraction = .80,
+  replace = FALSE,
+  importance = "permutation",
+  respect.unordered.factors = "order",
+  verbose = FALSE,
+  seed  = 123
+)
+
+
+p1 <- vip::vip(rf_impurity, num_features = 25, bar = FALSE) + ggtitle("Impurity-based")
+p2 <- vip::vip(rf_permutation, num_features = 25, bar = FALSE) + ggtitle("Permutation-based")
+
+gridExtra::grid.arrange(p1, p2, nrow = 1)
