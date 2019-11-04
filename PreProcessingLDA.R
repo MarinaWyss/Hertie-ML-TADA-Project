@@ -7,7 +7,7 @@ library(tidytext)
 library(tidyr)
 
 # your filepath here
-path <- "/Users/madelinebrady/Desktop/Fall 2019/Hertie-ML-TADA-Project/newspaper-data/English"
+path <- "/Users/AEMagaard/Documents/Hertie/Semester 3/Text Analysis/Project/newspaper-data"
 
 # create list of all outlets
 filenamesList <- list.files(path = path, full.names = TRUE)

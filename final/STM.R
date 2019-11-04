@@ -7,9 +7,11 @@ library(quanteda)
 library(stm)
 library(tools)
 library(tidytext)
+install.packages("caret")
+library(caret)
 
 # your filepath here
-path <- "/Users/marinabennett/Desktop/Hertie/1. Fall 2019/Machine Learning/Hertie-ML-TADA-Project/newspaper-data/English/finalFiles"
+path <- "/Users/AEMagaard/Documents/Hertie/Semester 3/Text Analysis/Project/english"
 
 # load data
 ## create list of all outlets
@@ -71,7 +73,7 @@ fullDataSet <- fullDataSet %>%
 fullDataSet$outlet_date = stri_join(fullDataSet$outlet, fullDataSet$date,sep="_")
 
 ## create a corpus and dfm
-newsCorpus <- corpus(fullDataSet) 
+newsCorpus <- corpus(fullDataSet, fullDataSet$topic_tags) 
 
 
 ## tokenize by word, pre-process, create dfm
@@ -160,11 +162,57 @@ summary(effect, topics = 1)
 # docvars and topic frequencies
 probabilities <- tidy(newsStm, matrix = "gamma", document_names = names(newsTokens))
 
-joinedDataSet <- cbind(probabilities, filteredDataSet$outlet_date)
+joinedDataSet <- cbind(probabilities, filteredDataSet$outlet)
 
 preppedDataSet <- joinedDataSet %>% 
-  rename(outlet_date = `filteredDataSet$outlet_date`) %>% 
+  rename(outlet_date = `filteredDataSet$outlet`) %>% 
   separate(outlet_date, into = c("outlet", "date"), sep = "_") %>% 
   group_by(document) %>% 
   filter(gamma == max(gamma)) %>% 
   arrange(date)
+
+
+######### class ########
+
+newsCorpusFiltered <- corpus(filteredDataSet) 
+docvars(newsCorpusFiltered, "outlet") <- filteredDataSet$outlet
+
+
+# shuffling to split into training and test set
+new.data <- sample(c("train", "test"), size=ndoc(newsCorpusFiltered), 
+              prob=c(0.80, 0.20), replace=TRUE)
+train <- which(new.data=="train")
+test <- which(new.data=="test")
+
+# create dfm from Corpus
+# tokenizing and creating DFM
+characters <- tokens(new.data, what="word")
+namesdfm <- dfm(characters)
+
+nb <- textmodel_nb(namesdfm[train,], docvars(newsCorpusFiltered, "outlet")[train])
+
+# predicting labels for test set
+preds <- predict(nb, newdata = namesdfm[test,])
+
+# computing the confusion matrix
+(cm <- table(preds, docvars(newsCorpusFiltered, "outlet")[test]))
+
+#### at home Wednesday Octoboer 30 - ML Probieren ####
+
+## random forest in the Caret package
+
+set.seed(42)
+model_rf <- caret::train(classes ~ .,
+                         data = filteredDataSet,
+                         method = "rf",
+                         preProcess = c("scale", "center"), #to get the data scaled center
+                         trControl = trainControl(method = "repeatedcv", 
+                                                  number = 10, 
+                                                  repeats = 10, 
+                                                  verboseIter = FALSE)) #runs random forest with 10 x 10 cross validation
+
+final <- data.frame(actual = test_data$classes,
+                    predict(model_rf, newdata = test_data, type = "prob"))
+final$predict <- ifelse(final$benign > 0.5, "benign", "malignant")
+
+cm_original <- confusionMatrix(final$predict, test_data$classes)

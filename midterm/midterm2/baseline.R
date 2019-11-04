@@ -92,3 +92,5 @@ topicsTopTerms %>%
   coord_flip() +
   scale_x_reordered()
 
+## implement
+
