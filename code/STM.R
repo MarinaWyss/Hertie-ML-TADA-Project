@@ -9,7 +9,7 @@ library(tools)
 library(tidytext)
 
 # your filepath here
-path <- "/Users/madelinebrady/Desktop/Fall 2019/Hertie-ML-TADA-Project"
+path <- "/Users/Jan/Desktop/Marina/Hertie-ML-TADA-Project/newspaper-data/English/finalFiles"
 
 # load data
 ## create list of all outlets
@@ -134,7 +134,7 @@ plot(kresult)
 
 
 # run the stm
-topic.count <- 14
+topic.count <- 4
 newsStm <- stm(newsConvert$documents, 
               newsConvert$vocab, 
               K = topic.count, 
@@ -143,11 +143,11 @@ newsStm <- stm(newsConvert$documents,
 
 
 # view results
-data.frame(t(labelTopics(newsStm, n = 20)$prob))
+data.frame(t(labelTopics(newsStm, n = 30)$prob))
 
-labelTopics(newsStm, c(1:14))
+labelTopics(newsStm, c(1:4))
 
-plot(newsStm, type = "summary", topics = c(1:10), xlim = c(0, 10))
+plot(newsStm, type = "summary", topics = c(1:4), xlim = c(0, 4))
 
 
 # estimate topic relationships
@@ -168,5 +168,7 @@ preppedDataSet <- joinedDataSet %>%
   group_by(document) %>% 
   filter(gamma == max(gamma)) %>% 
   arrange(date)
+
+write.csv(preppedDataSet, "preppedDataSet.csv")
 
 

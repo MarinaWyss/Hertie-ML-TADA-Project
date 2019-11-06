@@ -1,0 +1,58 @@
+date,location,zip,medianIncome,majorityRace,countyVote,dead,injusted,total,children,murderSuicide
+2018-11-26,"Powell, Tennessee",75153,"$36,650 ",White,Yes,0,4,4,Yes,No
+2018-11-25,"Houston, Texas",77018,"$81,565 ",White,No,1,6,7,Yes,No
+2018-11-25,"Demopolis, Alabama",36732,"$27,377 ",Black,No,2,2,4,No,No
+2018-11-25,"Oakland, California",94607,"$41,870 ",Black,No,0,4,4,No,No
+2018-11-24,"Orlando, Florida",32839,"$34,972 ",Black,No,2,2,4,No,No
+2018-11-23,"Miami, Florida",33142,"$23,346 ",Black,No,2,2,4,Yes,No
+2018-11-22,"Fort Wayne, Indiana",46816,"$34,989 ",White,Yes,3,2,5,No,No
+2018-11-21,"St. Louis, Missouri",63115,"$23,780 ",Black,No,0,4,4,No,No
+2018-11-19,"Denver, Colorado",80205,"$62,865 ",White,No,1,3,4,No,No
+2018-11-19,"Philadelphia, Pennsylvania",19143,"$32,741 ",Black,No,4,0,4,Yes,No
+2018-11-19,"Chicago, Illinois",60616,"$46,340 ",Asian,No,4,0,4,No,
+2018-11-18,"Los Angeles, California",90002,"$34,000 ",Latino,No,1,3,4,Yes,No
+2018-11-16,"Little Rock, Arkansas",72204,"$33,110 ",Black,No,3,1,4,Yes,No
+2018-11-16,"Wheatland, Wisconsin",53168,"$74,088 ",White,Yes,1,3,4,No,No
+2018-11-14,"Baton Rouge, Louisiana",70802,"$24,920 ",Black,No,3,1,4,No,No
+2018-11-13,"Indianapolis, Indiana",46231,"$62,390 ",White,No,2,2,4,No,No
+2018-11-13,"Tsayatoh, New Mexico",87301,"$42,325 ",American Indian,No,4,1,5,No,Yes
+2018-11-12,"Dunn, North Carolina",28334,"$36,840 ",White,Yes,3,1,4,No,No
+2018-11-11,"Globe, Arizona",85501,"$41,485 ",White,Yes,3,3,5,No,No
+2018-11-11,"Robbins, Illinois",60472,"$30,064 ",Black,No,1,4,5,No,No
+2018-11-10,"Memphis, Tennessee",38103,"$64,338 ",White,No,2,4,6,Yes,No
+2018-11-07,"Thousand Oaks, California",91361,"$116,114 ",White,No,13,12,25,No,Yes
+2018-11-03,"Watertown, New York",13601,"$46,365 ",White,Yes,0,5,5,No,No
+2018-11-02,"Long Beach, California",90805,"$47,981 ",White,No,0,4,4,Yes,No
+2018-11-02,"Tallahassee, Florida",32303,"$47,320 ",White,No,3,5,8,No,Yes
+2018-11-01,"Minneapolis, Minnesota",55412,"$44,069 ",White,No ,0,5,5,No,No
+2018-11-01,"Springfield, Missouri",65803,"$35,871 ",White,No,2,2,4,No,No
+2018-10-31,"Detroit, Michigan",48234,"$25,506 ",Black,No,1,3,4,Yes,No
+2018-10-30,"Vallejo, California",94591,"$78,628 ",White,No,2,3,5,,No
+2018-10-30,"Los Angeles, California",90044,"$32,278 ",Black,No,0,5,5,No,No
+2018-10-29,"Riverside, California",92507,"$44,912 ",White,No,0,7,7,No,No
+2018-10-28,"El Dorado, Arkansas",71730,"$41,444 ",White,Yes,2,2,4,No,No
+2018-10-27,"Pittsburgh, Pennsylvania",15217,"$73,294 ",White,No,11,6,17,No,No
+2018-10-27,"Memphis, Tennessee",38141,"$49,839 ",Black,No,0,5,5,Yes,No
+2018-10-26,"Jersey City, New Jersey",7305,"$49,453 ",Black,No,1,3,4,Yes,No
+2018-10-24,"Chicago, Illinois",60637,"$28,024 ",Black,No,0,5,5,No,No
+2018-10-22,"Chicago, Illinois",60644,"$27,617 ",Black,No,0,6,6,No,No
+2018-10-21,"Jacksonville, Florida",32202,"$28,025 ",Black,Yes,0,6,6,No,No
+2018-10-21,"Lakewood, Washington",98499,"$39,955 ",White,No,1,3,4,No,No
+2018-10-16,"Atlanta, Georgia",30312,"$48,802 ",Black,No,0,4,4,No,No
+2018-10-15,"Columbia, Tennessee",38401,"$49,028 ",White,Yes,5,0,5,Yes,Yes
+2018-10-14,"Fort Worth, Texas",76105,"$28,843 ",Black,Yes,0,4,4,Yes,No
+2018-10-14,"East Palo Alto, California",94303,"$98,361 ",White,No,2,2,4,No,No
+2018-10-14,"North Las Vegas, Nevada",89032,"$56,978 ",White,No,3,1,4,No,No
+2018-10-13,"St. Louis, Missouri",63137,"$36,849 ",Black,No,0,4,4,No,No
+2018-10-13,"Taft, Texas",78390,"$39,149 ",White,Yes,4,1,5,No,No
+2018-10-12,"Spartanburg, South Carolina",29301,"$41,867 ",White,Yes,0,6,6,No,No
+2018-10-12,"Las Vegas, Nevada",89109,"$46,875 ",White,No,0,4,4,No,No
+2018-10-08,"Birmingham, Alabama",35206,"$32,537 ",Black,No,0,4,4,No,No
+2018-10-06,"Tulsa, Oklahoma",74145,"$47,120 ",White,Yes,0,4,4,No,No
+2018-10-06,"Houston, Texas",77054,"$48,681 ",Black,No,1,3,4,No,No
+2018-10-06,"Oakland, California",66102,"$32,514 ",White,No,0,6,6,No,No
+2018-10-04,"Española, New Mexico",87566,"$33,203 ",American Indian,No,1,3,4,No,No
+2018-10-04,"Swainsboro, Georgia",30401,"$33,677 ",White,Yes,0,4,4,Yes,No
+2018-10-03,"Florence, South Carolina",29501,"$48,833 ",White,Yes,2,6,8,No,No
+2018-10-03,"Philadelphia, Pennsylvania",20874,"$86,718 ",White,No,1,4,5,No,No
+2018-10-01,"Chicago, Illinois",60632,"$42,335 ",White,No,2,2,4,No,No
