@@ -75,13 +75,13 @@ randomGridRF <- h2o.grid(
   x = predictors, 
   y = response, 
   training_frame = trainH2o,
-  hyper_params = hyperGrid,
+  hyper_params = hyperGridRF,
   ntrees = nFeatures * 10,
   seed = 123,
   stopping_metric = "misclassification",   
   stopping_rounds = 10,           # stop adding trees if we don't experience
   stopping_tolerance = 0.005,     # 0.05 improvement in error over last 10 trees
-  search_criteria = searchCriteria
+  search_criteria = searchCriteriaRF
 )
 
 gridPerformanceRF <- h2o.getGrid(
@@ -126,31 +126,11 @@ searchCriteriaGBM <- list(
   max_runtime_secs = 60*60      
 )
 
-gridGBM <- h2o.grid(
-  algorithm = "gbm",
-  grid_id = "gbm_grid",
-  x = predictors, 
-  y = response,
-  training_frame = trainH2o,
-  hyper_params = hyperGrid,
-  ntrees = 6000,
-  learn_rate = 0.01,
-  max_depth = 7,
-  min_rows = 5,
-  nfolds = 10,
-  stopping_rounds = 10,
-  stopping_tolerance = 0,
-  search_criteria = searchCriteria,
-  seed = 123
-)
-
 gridPerformanceGBM <- h2o.getGrid(
   grid_id = "gbm_grid", 
   sort_by = "mean_per_class_error", 
   decreasing = FALSE
 )
-
-gridPerformanceGBM
 
 
 ### STACKING MODELS ###
@@ -171,14 +151,3 @@ list(h2oRF1, h2oGBM) %>%
 
 h2o.performance(ensembleTree, newdata = testH2o)@metrics$mean_per_class_error
 
-
-### SVM ###
-library(e1071)
-
-X <- trainData %>% 
-  select(medianIncome, total, zip, dead, injured, childrenHarmed, majorityRace, countyVote)
-
-Y <- trainData$topic
-  
-model <- svm(x = X, y = Y, probability = TRUE)
-pred_prob <- predict(model, x = X, decision.values = TRUE, probability = TRUE)
