@@ -3,6 +3,7 @@ library(tidyverse)
 # adding independent variables to data set
 fullDataSet <- read.csv("preppedDataSet.csv")
 demographics <- read.csv("demoData.csv")
+ideology <- read.csv("ideology.csv")
 
 fullDataSet <- fullDataSet %>% 
   mutate(date = as.Date(date),
@@ -28,5 +29,7 @@ demographics <- demographics %>%
 
 joinedDataSet <- left_join(fullDataSet, demographics) %>% 
   fill(c(6:15), .direction = c("down"))
+
+joinedDataSet <- left_join(joinedDataSet, ideology)
 
 write.csv(joinedDataSet, file = "joinedDataSet.csv", row.names = FALSE)
