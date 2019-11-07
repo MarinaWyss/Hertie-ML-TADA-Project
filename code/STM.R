@@ -27,17 +27,16 @@ newsNames <- paste0(newsNames, "_df")
 
 
 # merge dataset
-breitbart_df$text <- as.character(breitbart_df$text)
-foxnews_df$text <- as.character(foxnews_df$text)
-nytimes_df$text <- as.character(nytimes_df$text)
-thinkprogress_df$text <- as.character(thinkprogress_df$text)
-wsj_df$text <- as.character(wsj_df$text)
-
+politico_df <- politico_df %>% select(-section)
+thehill_df <- thehill_df %>% select(-section)
+usatoday_df <- usatoday_df %>% select(-section)
+washingtonpost_df <- washingtonpost_df %>% select(-section, -subsection)
 wsj_df <- wsj_df %>% select(-section, -paywall)
+cnbc_df <- cnbc_df %>% select(-news_keywords)
 foxnews_df$topic_tags <- "NA"
+infowars_df$topic_tags <- "NA"
 
-fullDataSet <-  do.call("rbind", lapply(newsNames, get))
-
+fullDataSet <- do.call("rbind", lapply(newsNames, get))
 
 # filter for sports
 fullDataSet <- fullDataSet %>%
@@ -89,7 +88,8 @@ newsTokens <- tokens_remove(newsTokens,
 newsTokens <- tokens_remove(newsTokens,
                                 c("said", "say", "says", "like", 
                                   "p.m.", "a.m.", "don?", "it?", 
-                                  "breitbart", "times", "york"))
+                                  "breitbart", "times", "york",
+                                  "pic.twitter.com"))
 
 ## filtering articles with tokens relating to guns
 gunWords <- c("gun", "shooting", "gunman", "shooter", 
@@ -132,7 +132,7 @@ plot(kresult)
 
 
 # run the stm
-topic.count <- 6
+topic.count <- 5
 newsStm <- stm(newsConvert$documents, 
               newsConvert$vocab, 
               K = topic.count, 
@@ -143,9 +143,9 @@ newsStm <- stm(newsConvert$documents,
 # view results
 data.frame(t(labelTopics(newsStm, n = 20)$prob))
 
-labelTopics(newsStm, c(1:6))
+labelTopics(newsStm, c(1:5))
 
-plot(newsStm, type = "summary", topics = c(1:4), xlim = c(0, 4))
+plot(newsStm, type = "summary", topics = c(1:5), xlim = c(0, 4))
 
 
 # estimate topic relationships

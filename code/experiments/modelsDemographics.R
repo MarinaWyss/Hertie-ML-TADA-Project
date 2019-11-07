@@ -1,27 +1,24 @@
 library(caret)
 library(h2o)
 library(tidyverse)
+library(vip)
 
 h2o.init()   
 
 set.seed(123)  
 
-data <- read.csv("preppedDataSetPA.csv")
-ideology <- read.csv("ideology.csv")
-data <- merge(data, ideology)
-
-data$topic <- as.factor(data$topic)
-data$X <- NULL
+joinedDataSet <- read.csv("joinedDataSet.csv")
+joinedDataSet$topic <- as.factor(joinedDataSet$topic)
 
 # downsampling the data 
-balancedData <- upSample(x = data,
-                           y = data$topic)
+balancedData <- downSample(x = joinedDataSet[, -1],
+                           y = joinedDataSet$topic)
 
 # split data into training and test 
-index <- createDataPartition(data$topic, p = 0.7, 
+index <- createDataPartition(balancedData$topic, p = 0.7, 
                                list = FALSE)
-trainData <- data[index, ]
-testData  <- data[-index, ]
+trainData <- balancedData[index, ]
+testData  <- balancedData[-index, ]
 
 # convert data to h2o objects
 trainH2o <- as.h2o(trainData)
@@ -29,7 +26,11 @@ testH2o <- as.h2o(testData)
 
 # specifying variables
 response <- "topic"
-predictors <- "ideology"
+
+predictors <- trainData %>% 
+  select(-document, -gamma, -location, -Class, -topic, 
+         -date, -zip, -outlet) %>% 
+  colnames()
 
 nFeatures <- length(predictors)
 
@@ -151,4 +152,9 @@ list(h2oRF1, h2oGBM) %>%
   purrr::map_dbl(getMisclass)
 
 h2o.performance(ensembleTree, newdata = testH2o)@metrics$mean_per_class_error
+
+
+vip(h2oRF1)
+vip(h2oGBM)
+
 
