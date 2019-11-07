@@ -9,7 +9,7 @@ library(tools)
 library(tidytext)
 
 # your filepath here
-path <- "/Users/Jan/Desktop/Marina/Hertie-ML-TADA-Project/newspaper-data/English/finalFiles"
+path <- "/Users/marinabennett/Desktop/Hertie/1. Fall 2019/Machine Learning/Hertie-ML-TADA-Project/newspaper-data/English/finalFiles"
 
 # load data
 ## create list of all outlets
@@ -99,15 +99,33 @@ gunWords <- c("gun", "shooting", "gunman", "shooter",
 
 newsTokens <- keep(newsTokens, ~ any(gunWords %in% .x))
 
-## filtering docvars
+## manually filtered tokens for only the relevant documents
 filteredNames <- names(newsTokens)
-rowsToKeep <- as.numeric(substr(filteredNames, start = 5, stop = 100))
-fullDataSet$docNumber <- 1:length(fullDataSet$outlet)
-filteredDataSet <- subset(fullDataSet, docNumber %in% rowsToKeep)
+allGunTokens <- as.numeric(substr(filteredNames, start = 5, stop = 100))
 
+### saved out this full data set, did manual filter, re-load
+relevantArticles <- read.csv("filteredArticles.csv")
+tokensKeep <- relevantArticles$doc
+fullDataSet$docNumber <- 1:length(fullDataSet$outlet)
+filteredDataSet <- subset(fullDataSet, docNumber %in% tokensKeep)
+
+### filter docvars
 newsCorpusFiltered <- corpus(filteredDataSet) 
 docvars(newsCorpusFiltered, "outlet_date") <- filteredDataSet$outlet_date
 
+### create new corpus etc.
+newsCorpus <- corpus(filteredDataSet) 
+
+newsTokens <- newsCorpus %>%
+  tokens(what = "word", 
+         remove_url = TRUE, 
+         remove_punct = TRUE, 
+         remove_separators = TRUE, 
+         remove_numbers = TRUE)
+
+newsTokens <- tokens_remove(newsTokens,
+                            stopwords('english'), 
+                            min_nchar = 3L)
 
 # create DFM
 newsDfm <- dfm(newsTokens)
@@ -126,13 +144,13 @@ newsConvert <- convert(newsDfm, to = "stm",
 
 # find the ideal number of topics
 set.seed(123)
-K <- c(5:15) 
+K <- c(4:15) 
 kresult <- searchK(newsConvert$documents, newsConvert$vocab, K, init.type = "Spectral")
 plot(kresult)
 
 
 # run the stm
-topic.count <- 6
+topic.count <- 12
 newsStm <- stm(newsConvert$documents, 
               newsConvert$vocab, 
               K = topic.count, 
