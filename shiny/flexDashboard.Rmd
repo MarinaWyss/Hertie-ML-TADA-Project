@@ -1,0 +1,144 @@
+---
+title: "Media Coverage of Gun Violence in the US"
+output: 
+  flexdashboard::flex_dashboard:
+  orientation: rows
+runtime: shiny
+---
+
+```{r global, include=FALSE}
+library(flexdashboard)
+library(shiny)
+library(tidyverse)
+library(DT)
+
+# data prep
+data <- read.csv("data/joinedDataSet.csv")
+data$date <- as.Date(data$date)
+data <- data %>% 
+  mutate(topic = case_when(
+    topic == 1 ~ "GunControl",
+    topic == 2 ~ "Police",
+    topic == 3 ~ "HumanInterest",
+    topic == 4 ~ "NationalSecurity",
+    topic == 5 ~ "PittsburghShooting",
+    topic == 6 ~ "Politics"))
+
+```
+
+Inputs {.sidebar}
+-----------------------------------------------------------------------
+Choose a news outlet to display their distribution of topics and a time frame between Oct. 1 and Nov. 30, 2018.
+
+```{r}
+selectInput("outlet", 
+                  label = "Choose a news outlet",
+                  choices = c("all",
+                              "breitbart", 
+                              "foxnews",
+                              "thinkprogress", 
+                              "nytimes"),
+                  selected = "all")
+
+dateRangeInput("dateRange", "Date range:",
+                     start = "2018-10-01",
+                     end   = "2018-11-30")
+```
+
+Row 
+-----------------------------------------------------------------------
+
+### Number of shootings {.value-box}
+
+```{r}
+renderValueBox({
+  
+  # preparing data
+  shootingData <- data[ !duplicated(data$zip), ]
+
+  shootingData <- shootingData %>%
+    filter(date >= input$dateRange[1] & date <= input$dateRange[2]) %>% 
+    group_by(date) %>% 
+    mutate(totalShootings = length(zip),
+         totalDeadInjured = sum(total)) %>% 
+    ungroup() 
+    
+  shootingData <- shootingData[ !duplicated(shootingData$date), ]
+    
+  shootingData <- shootingData %>% 
+    select(totalShootings, totalDeadInjured) %>% 
+    summarize_all(sum) 
+
+  shootings <- shootingData$totalShootings
+
+  valueBox(
+    value = shootings
+  )
+})
+```
+
+### Number of people injured or killed by guns {.value-box}
+
+```{r}
+renderValueBox({
+  
+  # preparing data
+  shootingData <- data[ !duplicated(data$zip), ]
+
+  shootingData <- shootingData %>%
+    filter(date >= input$dateRange[1] & date <= input$dateRange[2]) %>% 
+    group_by(date) %>% 
+    mutate(totalShootings = length(zip),
+         totalDeadInjured = sum(total)) %>% 
+    ungroup() 
+    
+  shootingData <- shootingData[ !duplicated(shootingData$date), ]
+    
+  shootingData <- shootingData %>% 
+    select(totalShootings, totalDeadInjured) %>% 
+    summarize_all(sum) 
+
+  injuredDead <- shootingData$totalDeadInjured
+
+  valueBox(
+    value = injuredDead
+  )
+})
+```
+
+Row {.tabset} 
+-----------------------------------------------------------------------
+## Distribution of topics
+
+```{r plot}
+renderPlot({
+    
+    if(input$outlet == "all"){
+      outletData <- data %>% 
+        filter(date >= input$dateRange[1] & date <= input$dateRange[2])
+    }else{
+      outletData <- data %>% 
+        filter(outlet == input$outlet) %>% 
+        filter(date >= input$dateRange[1] & date <= input$dateRange[2])
+    }
+    
+    plt <- ggplot(data = outletData, 
+                  aes(x = as.factor(topic))) +
+      geom_bar(aes(fill = as.factor(topic)),
+               color = "black") +
+      geom_text(stat = "count", 
+                aes(label = ..count..), 
+                vjust = 2) +
+      scale_fill_manual(values = c("#d8b365", "#f6e8c3", "#DCE6F0", 
+                                   "#84dee3", "#43bfde", "#0E77ED")) +
+      theme(axis.text.x = element_text(angle = 25,
+                                       size = 12)) +
+      labs(fill = "Topic",
+           x = "Topic",
+           y = "Count", 
+           title = "Distribution of topics")
+    
+    plt
+})
+```
+
