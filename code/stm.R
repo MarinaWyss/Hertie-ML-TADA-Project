@@ -57,7 +57,7 @@ fullDataSet <- fullDataSet %>% select(-datetime)
 
 ## limit time period for baseline
 fullDataSet <- fullDataSet %>%
-  filter(date >= "2018:10:01" & date <= "2018:11:30")
+  filter(date >= "2018:06:01" & date <= "2018:07:31")
 
 ## create variables for day of the year 
 fullDataSet$date <- str_replace_all(fullDataSet$date, ":", "-")
@@ -126,13 +126,13 @@ newsConvert <- convert(newsDfm, to = "stm",
 
 # find the ideal number of topics
 set.seed(123)
-K <- c(5:15) 
+K <- c(4:8) 
 kresult <- searchK(newsConvert$documents, newsConvert$vocab, K, init.type = "Spectral")
 plot(kresult)
 
 
 # run the stm
-topic.count <- 5
+topic.count <- 6
 newsStm <- stm(newsConvert$documents, 
               newsConvert$vocab, 
               K = topic.count, 
@@ -143,7 +143,7 @@ newsStm <- stm(newsConvert$documents,
 # view results
 data.frame(t(labelTopics(newsStm, n = 20)$prob))
 
-labelTopics(newsStm, c(1:5))
+labelTopics(newsStm, c(1:6))
 
 plot(newsStm, type = "summary", topics = c(1:5), xlim = c(0, 4))
 
