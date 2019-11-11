@@ -38,6 +38,9 @@ infowars_df$topic_tags <- "NA"
 
 fullDataSet <- do.call("rbind", lapply(newsNames, get))
 
+ideology <- read.csv("ideology.csv")
+fullDataSet <- merge(fullDataSet, ideology)
+
 # filter for sports
 fullDataSet <- fullDataSet %>%
   filter(domain != "Sports" & 
@@ -107,6 +110,8 @@ filteredDataSet <- subset(fullDataSet, docNumber %in% rowsToKeep)
 
 newsCorpusFiltered <- corpus(filteredDataSet) 
 docvars(newsCorpusFiltered, "outlet_date") <- filteredDataSet$outlet_date
+docvars(newsCorpusFiltered, "ideology") <- filteredDataSet$ideology
+
 
 
 # create DFM
