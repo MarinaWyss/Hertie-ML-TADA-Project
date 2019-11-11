@@ -10,19 +10,25 @@ runtime: shiny
 library(flexdashboard)
 library(shiny)
 library(tidyverse)
-library(DT)
 
 # data prep
 data <- read.csv("data/joinedDataSet.csv")
 data$date <- as.Date(data$date)
 data <- data %>% 
   mutate(topic = case_when(
-    topic == 1 ~ "GunControl",
-    topic == 2 ~ "Police",
-    topic == 3 ~ "HumanInterest",
-    topic == 4 ~ "NationalSecurity",
-    topic == 5 ~ "PittsburghShooting",
-    topic == 6 ~ "Politics"))
+    topic == 1 ~ "HumanInterest",
+    topic == 2 ~ "NationalSecurity",
+    topic == 3 ~ "Police",
+    topic == 4 ~ "Politics",
+    topic == 5 ~ "PittsburghShooting"))
+
+shootings <- read.csv("data/demoData.csv")
+shootings <- shootings %>% 
+  select(date, zip, total) %>% 
+  mutate(date = as.character(date))
+shootings$date <- as.Date(shootings$date)
+
+fullData <- left_join(data, shootings)
 
 ```
 
@@ -34,10 +40,23 @@ Choose a news outlet to display their distribution of topics and a time frame be
 selectInput("outlet", 
                   label = "Choose a news outlet",
                   choices = c("all",
-                              "breitbart", 
+                              "abcnews", 
+                              "breitbart",
+                              "cnbc", 
+                              "dailykos",
                               "foxnews",
-                              "thinkprogress", 
-                              "nytimes"),
+                              "huffingtonpost",
+                              "infowars",
+                              "motherjones",
+                              "newsweek",
+                              "newyorker",
+                              "nytimes",
+                              "politico",
+                              "thehill",
+                              "thinkprogress",
+                              "townhall",
+                              "vice",
+                              "washingtonpost"),
                   selected = "all")
 
 dateRangeInput("dateRange", "Date range:",
@@ -58,7 +77,8 @@ Row
 renderValueBox({
   
   # preparing data
-  shootingData <- data[ !duplicated(data$zip), ]
+  shootingData <- fullData[ !duplicated(fullData$zip), ]
+  shootingData <- shootingData[complete.cases(shootingData), ]
 
   shootingData <- shootingData %>%
     filter(date >= input$dateRange[1] & date <= input$dateRange[2]) %>% 
@@ -73,10 +93,8 @@ renderValueBox({
     select(totalShootings, totalDeadInjured) %>% 
     summarize_all(sum) 
 
-  shootings <- shootingData$totalShootings
-
   valueBox(
-    value = shootings
+    value = shootingData$totalShootings
   )
 })
 ```
@@ -87,7 +105,8 @@ renderValueBox({
 renderValueBox({
   
   # preparing data
-  shootingData <- data[ !duplicated(data$zip), ]
+  shootingData <- fullData[ !duplicated(fullData$zip), ]
+  shootingData <- shootingData[complete.cases(shootingData), ]
 
   shootingData <- shootingData %>%
     filter(date >= input$dateRange[1] & date <= input$dateRange[2]) %>% 
@@ -102,10 +121,8 @@ renderValueBox({
     select(totalShootings, totalDeadInjured) %>% 
     summarize_all(sum) 
 
-  injuredDead <- shootingData$totalDeadInjured
-
   valueBox(
-    value = injuredDead
+    value = shootingData$totalDeadInjured
   )
 })
 ```
@@ -119,10 +136,10 @@ Row
 renderPlot({
     
     if(input$outlet == "all"){
-      outletData <- data %>% 
+      outletData <- fullData %>% 
         filter(date >= input$dateRange[1] & date <= input$dateRange[2])
     }else{
-      outletData <- data %>% 
+      outletData <- fullData %>% 
         filter(outlet == input$outlet) %>% 
         filter(date >= input$dateRange[1] & date <= input$dateRange[2])
     }
