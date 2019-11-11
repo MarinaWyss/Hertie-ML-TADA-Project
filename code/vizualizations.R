@@ -168,3 +168,75 @@ timePlot <- ggplot(timeData, aes(x = date, y = prop)) +
        title = "Topic Distribution Over Time")
   
 timePlot
+
+
+# topics over time plot
+## very liberal
+veryLiberalTime <- veryLiberal  %>%
+  group_by(date, topic) %>%
+  summarise(n = n()) %>%
+  mutate(perday_freq = n / sum(n))
+
+veryLiberalTime$date <- as.numeric(veryLiberalTime$date)
+
+ggplot(veryLiberalTime, aes(x=date, y=perday_freq, fill=topic)) + 
+  geom_area(alpha=0.6 , size=1, colour="black") +
+  
+  labs(fill = "Topic", 
+       x = "Date", 
+       y = "Topic Frequency", 
+       title = "Very liberal outlets: distribution of topics over time")
+
+##liberal
+liberalTime <- liberal  %>%
+  group_by(date, topic) %>%
+  summarise(n = n()) %>%
+  mutate(perday_freq = n / sum(n))
+
+liberalTime$date <- as.numeric(liberalTime$date)
+
+ggplot(liberalTime, aes(x=date, y=perday_freq, fill=topic)) + 
+  geom_area(alpha=0.6 , size=1, colour="black") +
+  
+  labs(fill = "Topic", 
+       x = "Date", 
+       y = "Topic Frequency", 
+       title = "Liberal outlets: distribution of topics over time")
+
+## conservative 
+conservativeTime <- conservative  %>%
+  group_by(date, topic) %>%
+  summarise(n = n()) %>%
+  mutate(perday_freq = n / sum(n))
+
+conservativeTime$date <- as.numeric(conservativeTime$date)
+conservativeTime$topic <- factor(conservativeTime$topic , levels=c("Police", "HumanInterest", 
+                                                                   "Politics", "NationalSecurity", 
+                                                                   "SchoolShootings", "SecondAmendment") )
+
+ggplot(conservativeTime, aes(x=date, y=perday_freq, fill=topic)) + 
+  geom_area(alpha=0.6 , size=1, colour="black") +
+  
+  labs(fill = "Topic", 
+       x = "Date", 
+       y = "Topic Frequency", 
+       title = "Conservative outlets: distribution of topics over time")
+
+## very conservative 
+veryConservativeTime <- veryConservative  %>%
+  group_by(date, topic) %>%
+  summarise(n = n()) %>%
+  mutate(perday_freq = n / sum(n))
+
+veryConservativeTime$date <- as.numeric(veryConservativeTime$date)
+veryConservativeTime$topic <- factor(veryConservativeTime$topic , levels=c("Police", "HumanInterest", 
+                                                                           "Politics", "NationalSecurity", 
+                                                                           "SchoolShootings", "SecondAmendment") )
+
+ggplot(veryConservativeTime, aes(x=date, y=perday_freq, fill=topic)) + 
+  geom_area(alpha=0.6 , size=1, colour="black") +
+  
+  labs(fill = "Topic", 
+       x = "Date", 
+       y = "Topic Frequency", 
+       title = "Very conservative outlets: distribution of topics over time")
