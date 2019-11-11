@@ -1,9 +1,4 @@
-library(caret)
-library(h2o)
 library(tidyverse)
-library(vip)
-
-h2o.init()   
 
 set.seed(123)  
 
@@ -14,63 +9,121 @@ data <- merge(data, ideology)
 data$topic <- as.factor(data$topic)
 data$X <- NULL
 
-# vizualizations
-
-## overall top topic by outlet (before downsampling)
-## calculate topic proportion for each outlet
-# breitbart: top topic is #2
-breitbartData <- data %>% filter(outlet == "breitbart")
-
-plot1Topic <- ggplot(breitbartData, aes(x=topic, fill=topic))+
-  geom_bar(stat="count", width=0.7) + scale_fill_hue()
-
-breitbartCount <- as.data.frame(table(breitbartData$topic))
-breitbartCount %>% mutate(n = length(breitbartData$topic),
-                          topic_proportion = Freq / n
-                            )
-
-breitbartProp <- max(breitbartCount$Freq) / length(breitbartData$topic)
+data <- data %>% 
+  mutate(topic = case_when(
+    topic == 1 ~ "Police",
+    topic == 2 ~ "NationalSecurity",
+    topic == 3 ~ "SecondAmendment",
+    topic == 4 ~ "HumanInterest",
+    topic == 5 ~ "Politics", 
+    topic == 6 ~ "SchoolShootings"))
 
 
-# fox: top topic is #3
-foxData <- data %>% filter(outlet == "foxnews")
+# datasets
+veryLiberal <- data %>% 
+  filter(ideology < 2)
 
-plot2Topic <- ggplot(foxData, aes(x=topic, fill=topic))+
-  geom_bar(stat="count", width=0.7) + scale_fill_hue()
-plot2Topic
+liberal <- data %>% 
+  filter(ideology >= 2 & ideology < 3)
 
-foxCount <- as.data.frame(table(foxData$topic))
-foxProp <- max(foxCount$Freq) / length(foxData$topic)
+conservative <- data %>% 
+  filter(ideology >= 3 & ideology < 4)
 
-
-
-# nyt: top topic is #4
-nytData <- data %>% filter(outlet == "nytimes")
-nytCount <- as.data.frame(table(nytData$topic))
-nytProp <- max(nytCount$Freq) / length(nytData$topic)
-nytCount
-
-# wsj: top topic is #4
-wsjData <- data %>% filter(outlet == "wallstreetjournal")
-wsjCount <- as.data.frame(table(wsjData$topic))
-wsjProp <- max(wsjCount$Freq) / length(wsjData$topic)
-
-# thinkprogress: top topic is #6
-thinkprogData <- data %>% filter(outlet == "thinkprogress")
-thinkprogCount <- as.data.frame(table(thinkprogData$topic))
-thinkprogProp <- max(thinkprogCount$Freq) / length(thinkprogData$topic)
-
-# join plots
-grid.arrange(plot1, plot2, ncol=2)
+veryConservative <- data %>% 
+  filter(ideology >= 4)
 
 
+# topic by ideology
+overallPlot <- ggplot(data = data, 
+                          aes(x = topic)) +
+  geom_bar(aes(fill = topic),
+           color = "black") +
+  geom_text(stat = "count", 
+            aes(label = ..count..), 
+            vjust = 2) +
+  scale_fill_manual(values = c("#d8b365", "#f6e8c3", "#DCE6F0", 
+                               "#84dee3", "#43bfde", "#0E77ED")) +
+  theme(axis.text.x = element_text(angle = 25,
+                                   size = 12)) +
+  labs(fill = "Topic",
+       x = "Topic",
+       y = "Count", 
+       title = "Distribution of topics")
 
-outlet_names <- c("breitbart", "foxnews", "nytimes", "wallstreetjournal", "thinkprogress")
-topic_proportions <- c(breitbartProp, foxProp, nytProp, wsjProp, thinkprogProp)
-top_topic <- 
+overallPlot
 
-overallTopTopic <- cbind(outlet_names, topic_proportions)
 
-## join overall proportions
+veryLiberalPlot <- ggplot(data = veryLiberal, 
+                      aes(x = topic)) +
+  geom_bar(aes(fill = topic),
+           color = "black") +
+  geom_text(stat = "count", 
+            aes(label = ..count..), 
+            vjust = 2) +
+  scale_fill_manual(values = c("#d8b365", "#f6e8c3", "#DCE6F0", 
+                               "#84dee3", "#43bfde", "#0E77ED")) +
+  theme(axis.text.x = element_text(angle = 25,
+                                   size = 12)) +
+  labs(fill = "Topic",
+       x = "Topic",
+       y = "Count", 
+       title = "Distribution of topics")
 
-## topic over time by outlet
+veryLiberalPlot
+
+
+liberalPlot <- ggplot(data = liberal, 
+                          aes(x = topic)) +
+  geom_bar(aes(fill = topic),
+           color = "black") +
+  geom_text(stat = "count", 
+            aes(label = ..count..), 
+            vjust = 2) +
+  scale_fill_manual(values = c("#d8b365", "#f6e8c3", "#DCE6F0", 
+                               "#84dee3", "#43bfde", "#0E77ED")) +
+  theme(axis.text.x = element_text(angle = 25,
+                                   size = 12)) +
+  labs(fill = "Topic",
+       x = "Topic",
+       y = "Count", 
+       title = "Distribution of topics")
+
+liberalPlot
+
+
+conservativePlot <- ggplot(data = conservative, 
+                      aes(x = topic)) +
+  geom_bar(aes(fill = topic),
+           color = "black") +
+  geom_text(stat = "count", 
+            aes(label = ..count..), 
+            vjust = 2) +
+  scale_fill_manual(values = c("#d8b365", "#f6e8c3", "#DCE6F0", 
+                               "#84dee3", "#43bfde", "#0E77ED")) +
+  theme(axis.text.x = element_text(angle = 25,
+                                   size = 12)) +
+  labs(fill = "Topic",
+       x = "Topic",
+       y = "Count", 
+       title = "Distribution of topics")
+
+conservativePlot
+
+
+veryConservativePlot <- ggplot(data = veryConservative, 
+                           aes(x = topic)) +
+  geom_bar(aes(fill = topic),
+           color = "black") +
+  geom_text(stat = "count", 
+            aes(label = ..count..), 
+            vjust = 2) +
+  scale_fill_manual(values = c("#d8b365", "#f6e8c3", "#DCE6F0", 
+                               "#84dee3", "#43bfde", "#0E77ED")) +
+  theme(axis.text.x = element_text(angle = 25,
+                                   size = 12)) +
+  labs(fill = "Topic",
+       x = "Topic",
+       y = "Count", 
+       title = "Distribution of topics")
+
+veryConservativePlot
