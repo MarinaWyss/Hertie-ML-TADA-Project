@@ -151,13 +151,21 @@ data.frame(t(labelTopics(newsStm, n = 20)$prob))
 
 labelTopics(newsStm, c(1:6))
 
-plot(newsStm, type = "summary", topics = c(1:6), xlim = c(0, 20))
+plot(newsStm, type = "summary", topics = c(1:6), xlim = c(0, 6))
+
+# estimate topic relationships
+effect <- estimateEffect(formula = 1:20 ~ outlet_date, stmobj = newsStm,
+                         metadata = newsConvert$meta, uncertainty = "Global")
+
+summary(effect, topics = 1)
+
 
 # docvars and topic frequencies
 probabilities <- tidy(newsStm, matrix = "gamma", document_names = names(newsTokens))
 
 joinedDataSet <- cbind(probabilities, filteredDataSet$outlet_date)
 
+# save joined dataset
 preppedDataSet <- joinedDataSet %>% 
   rename(outlet_date = `filteredDataSet$outlet_date`) %>% 
   separate(outlet_date, into = c("outlet", "date"), sep = "_") %>% 
