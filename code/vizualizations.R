@@ -13,13 +13,15 @@ data <- data %>%
   mutate(topic = case_when(
     topic == 1 ~ "Police",
     topic == 2 ~ "NationalSecurity",
-    topic == 3 ~ "SecondAmendment",
-    topic == 4 ~ "HumanInterest",
+    topic == 3 ~ "HumanInterest",
+    topic == 4 ~ "SecondAmendment",
     topic == 5 ~ "Politics", 
     topic == 6 ~ "SchoolShootings"))
 
 
-# datasets
+# topic by ideology
+
+## prep data
 veryLiberal <- data %>% 
   filter(ideology < 2)
 
@@ -32,8 +34,7 @@ conservative <- data %>%
 veryConservative <- data %>% 
   filter(ideology >= 4)
 
-
-# topic by ideology
+## plotting
 overallPlot <- ggplot(data = data, 
                           aes(x = topic)) +
   geom_bar(aes(fill = topic),
@@ -127,3 +128,43 @@ veryConservativePlot <- ggplot(data = veryConservative,
        title = "Distribution of topics")
 
 veryConservativePlot
+
+
+# topics over time
+
+## prep data
+timeData <- data %>% 
+  group_by(date) %>% 
+  mutate(propPolice = (sum(topic == "Police")/length(topic)),
+         propNationalSec = (sum(topic == "NationalSecurity")/length(topic)),
+         propHumanInterest = (sum(topic == "HumanInterest")/length(topic)),
+         propSecondAmendment = (sum(topic == "SecondAmendment")/length(topic)),
+         propPolitics = (sum(topic == "Politics")/length(topic)),
+         propSchoolShootings = (sum(topic == "SchoolShootings")/length(topic))
+  ) %>% 
+  ungroup()
+
+timeData <- timeData[ !duplicated(timeData$date), ]
+
+timeData <- timeData %>% 
+  mutate(date = as.character(date)) %>% 
+  select(starts_with("prop"), date) %>% 
+  pivot_longer(-date, 
+               names_to = "topic",
+               values_to = "prop") %>% 
+  mutate(date = as.Date(date))
+
+## plotting
+
+timePlot <- ggplot(timeData, aes(x = date, y = prop)) +
+  geom_area(aes(fill = as.factor(topic)), color = "black") + 
+  scale_fill_manual(labels = c("Human Interest", "National Security", "Police", 
+                               "Politics", "School Shootings", "Second Amendment"),
+                    values = c("#d8b365", "#f6e8c3", "#DCE6F0", 
+                               "#84dee3", "#43bfde", "#0E77ED")) +
+  labs(fill = "Topics", 
+       x = "Date", 
+       y = "Topics",
+       title = "Topic Distribution Over Time")
+  
+timePlot

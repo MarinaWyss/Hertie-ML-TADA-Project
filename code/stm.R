@@ -150,8 +150,7 @@ data.frame(t(labelTopics(newsStm, n = 20)$prob))
 
 labelTopics(newsStm, c(1:6))
 
-plot(newsStm, type = "summary", topics = c(1:5), xlim = c(0, 4))
-
+plot(newsStm, type = "summary", topics = c(1:6), xlim = c(0, 6))
 
 # estimate topic relationships
 effect <- estimateEffect(formula = 1:20 ~ outlet_date, stmobj = newsStm,
@@ -165,6 +164,7 @@ probabilities <- tidy(newsStm, matrix = "gamma", document_names = names(newsToke
 
 joinedDataSet <- cbind(probabilities, filteredDataSet$outlet_date)
 
+# save joined dataset
 preppedDataSet <- joinedDataSet %>% 
   rename(outlet_date = `filteredDataSet$outlet_date`) %>% 
   separate(outlet_date, into = c("outlet", "date"), sep = "_") %>% 
