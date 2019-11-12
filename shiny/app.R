@@ -8,12 +8,12 @@ data <- read.csv("data/joinedDataSet.csv")
 data$date <- as.Date(data$date)
 data <- data %>% 
   mutate(topic = case_when(
-    topic == 1 ~ "GunControl",
-    topic == 2 ~ "Police",
+    topic == 1 ~ "Police",
+    topic == 2 ~ "NationalSecurity",
     topic == 3 ~ "HumanInterest",
-    topic == 4 ~ "NationalSecurity",
-    topic == 5 ~ "PittsburghShooting",
-    topic == 6 ~ "Politics"))
+    topic == 4 ~ "SecondAmendment",
+    topic == 5 ~ "Politics",
+    topic == 6 ~ "SchoolShootings"))
 
 ui <- fluidPage(
   
@@ -77,12 +77,12 @@ server <- function(input, output){
   # a table showing the number of shootings and dead/injured
    output$shootinginfo <- renderDataTable({
 
-   shootingData <- data[ !duplicated(data$zip), ]
+   shootingData <- data[ !duplicated(data$city), ]
    
    shootingData <- shootingData %>%
      filter(date >= input$dateRange[1] & date <= input$dateRange[2]) %>% 
      group_by(date) %>% 
-     mutate(totalShootings = length(zip),
+     mutate(totalShootings = length(city),
             totalDeadInjured = sum(total)) %>% 
      ungroup() 
    

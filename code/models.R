@@ -247,20 +247,29 @@ ensembleTree2 <- h2o.stackedEnsemble(
 )
 
 h2o.performance(ensembleTree2, newdata = trainH2o)
-# mean per class error = 
+# mean per class error = 0.6721146
 
 
 ## on test data
 h2o.performance(ensembleTree2, newdata = testH2o)
-# mean per class error = 
+# mean per class error = 0.6741996
 
 
 # table
-confusionMatrix <- h2o.confusionMatrix(ensembleTree, newdata = testH2o)
+confusionMatrix <- h2o.confusionMatrix(ensembleTree2, newdata = testH2o)
+
+names(confusionMatrix) <- c("Police", "NationalSecurity", "HumanInterest",
+                            "SecondAmendment", "Politics","SchoolShootings",
+                            "Error", "Rate")
+
+rownames(confusionMatrix) <- c("Police", "NationalSecurity", "HumanInterest",
+                               "SecondAmendment", "Politics","SchoolShootings",
+                               "Totals")
 
 confusionMatrix %>% 
   kable() %>% 
   kable_styling() %>% 
+  column_spec(1, bold = T, border_right = T) %>%
   add_header_above(c(" " = 1, "Ensemble Model Results: Confusion Matrix" = 8)) %>% 
   footnote("Rows: Actual class, Columns: Predicted class")
 

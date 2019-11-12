@@ -1,0 +1,26 @@
+\begin{table}[H]
+\centering
+\begin{tabular}{>{\bfseries}l||r|r|r|r|r|r|r|l}
+\hline
+\multicolumn{1}{c|}{ } & \multicolumn{8}{c}{Ensemble Model Results: Confusion Matrix} \\
+\cline{2-9}
+  & Police & NationalSecurity & HumanInterest & SecondAmendment & Politics & SchoolShootings & Error & Rate\\
+\hline
+Police & 283 & 0 & 27 & 26 & 11 & 7 & 0.2005650 & 71 / 354\\
+\hline
+NationalSecurity & 95 & 24 & 39 & 131 & 47 & 18 & 0.9322034 & 330 / 354\\
+\hline
+HumanInterest & 103 & 6 & 87 & 77 & 55 & 26 & 0.7542373 & 267 / 354\\
+\hline
+SecondAmendment & 102 & 3 & 37 & 169 & 36 & 7 & 0.5225989 & 185 / 354\\
+\hline
+Politics & 106 & 13 & 53 & 72 & 101 & 9 & 0.7146893 & 253 / 354\\
+\hline
+SchoolShootings & 168 & 6 & 37 & 78 & 37 & 28 & 0.9209040 & 326 / 354\\
+\hline
+Totals & 857 & 52 & 280 & 553 & 287 & 95 & 0.6741996 & 1,432 / 2,124\\
+\hline
+\multicolumn{9}{l}{\textit{Note: }}\\
+\multicolumn{9}{l}{Rows: Actual class, Columns: Predicted class}\\
+\end{tabular}
+\end{table}

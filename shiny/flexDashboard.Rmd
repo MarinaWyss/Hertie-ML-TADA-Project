@@ -16,15 +16,16 @@ data <- read.csv("data/joinedDataSet.csv")
 data$date <- as.Date(data$date)
 data <- data %>% 
   mutate(topic = case_when(
-    topic == 1 ~ "HumanInterest",
+    topic == 1 ~ "Police",
     topic == 2 ~ "NationalSecurity",
-    topic == 3 ~ "Police",
-    topic == 4 ~ "Politics",
-    topic == 5 ~ "PittsburghShooting"))
+    topic == 3 ~ "HumanInterest",
+    topic == 4 ~ "SecondAmendment",
+    topic == 5 ~ "Politics",
+    topic == 6 ~ "SchoolShootings"))
 
 shootings <- read.csv("data/demoData.csv")
 shootings <- shootings %>% 
-  select(date, zip, total) %>% 
+  select(date, city, total) %>% 
   mutate(date = as.character(date))
 shootings$date <- as.Date(shootings$date)
 
@@ -34,38 +35,21 @@ fullData <- left_join(data, shootings)
 
 Sidebar {.sidebar}
 =======================================================================
-Choose a news outlet to display their distribution of topics and a time frame between Oct. 1 and Nov. 30, 2018.
+Choose a news outlet to display their distribution of topics and a time frame between June 1 and July 31st, 2018.
 
 ```{r}
 selectInput("outlet", 
                   label = "Choose a news outlet",
-                  choices = c("all",
-                              "abcnews", 
-                              "breitbart",
-                              "cnbc", 
-                              "dailykos",
-                              "foxnews",
-                              "huffingtonpost",
-                              "infowars",
-                              "motherjones",
-                              "newsweek",
-                              "newyorker",
-                              "nytimes",
-                              "politico",
-                              "thehill",
-                              "thinkprogress",
-                              "townhall",
-                              "vice",
-                              "washingtonpost"),
+                  choices = unique(fullData$outlet),
                   selected = "all")
 
 dateRangeInput("dateRange", "Date range:",
-                     start = "2018-10-01",
-                     end   = "2018-11-30")
+                     start = "2018-06-01",
+                     end   = "2018-07-31")
 ```
 
 
-Dashboard
+Dashboard {data-icon="fa-bar-chart"}
 =======================================================================
 
 Row
@@ -77,13 +61,13 @@ Row
 renderValueBox({
   
   # preparing data
-  shootingData <- fullData[ !duplicated(fullData$zip), ]
+  shootingData <- fullData[ !duplicated(fullData$city), ]
   shootingData <- shootingData[complete.cases(shootingData), ]
 
   shootingData <- shootingData %>%
     filter(date >= input$dateRange[1] & date <= input$dateRange[2]) %>% 
     group_by(date) %>% 
-    mutate(totalShootings = length(zip),
+    mutate(totalShootings = length(city),
          totalDeadInjured = sum(total)) %>% 
     ungroup() 
     
@@ -105,13 +89,13 @@ renderValueBox({
 renderValueBox({
   
   # preparing data
-  shootingData <- fullData[ !duplicated(fullData$zip), ]
+  shootingData <- fullData[ !duplicated(fullData$city), ]
   shootingData <- shootingData[complete.cases(shootingData), ]
 
   shootingData <- shootingData %>%
     filter(date >= input$dateRange[1] & date <= input$dateRange[2]) %>% 
     group_by(date) %>% 
-    mutate(totalShootings = length(zip),
+    mutate(totalShootings = length(city),
          totalDeadInjured = sum(total)) %>% 
     ungroup() 
     
@@ -157,9 +141,40 @@ renderPlot({
                                        size = 12)) +
       labs(fill = "Topic",
            x = "Topic",
-           y = "Count", 
-           title = "Distribution of topics")
+           y = "Count")
     
     plt
 })
+```
+
+
+Words by topic {data-icon="fa-list"}
+====================================================================
+
+### Which words have the highest probability of belonging to each topic?
+
+```{r}
+
+fillCol(height = 600, flex = c(NA, 1), 
+  inputPanel(
+    selectizeInput("chooseTopic", "Choose a topic", choices = unique(fullData$topic))
+  ),
+  plotOutput("topicPlot", height = "100%")
+)
+
+
+# output$topicPlot <- renderPlot({
+#    td_beta %>%
+#        filter(topic == input$chooseTopic) %>%
+#        top_n(15, beta) %>%
+#        mutate(term = reorder(term, beta)) %>%
+#        ggplot(aes(term, beta, fill = beta)) +
+#        geom_col(show.legend = FALSE) +
+#        scale_fill_gradient(low = "#5FBA7D", high = "#108AEC") +
+#        scale_y_continuous(expand = c(0,0),
+#                           labels = percent_format()) +
+#        coord_flip() +
+#        theme_minimal(base_size = 18) +
+#        labs(x = NULL, y = expression(beta))
+# })
 ```
