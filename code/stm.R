@@ -165,6 +165,7 @@ probabilities <- tidy(newsStm, matrix = "gamma", document_names = names(newsToke
 
 joinedDataSet <- cbind(probabilities, filteredDataSet$outlet_date)
 
+# save joined dataset
 preppedDataSet <- joinedDataSet %>% 
   rename(outlet_date = `filteredDataSet$outlet_date`) %>% 
   separate(outlet_date, into = c("outlet", "date"), sep = "_") %>% 
@@ -174,4 +175,64 @@ preppedDataSet <- joinedDataSet %>%
 
 write.csv(preppedDataSet, "preppedDataSet.csv")
 
+# word cloud for each topic
+cloud(newsStm, topic = 1, scale = c(2, 0.5))
+cloud(newsStm, topic = 2, scale = c(2, 0.5))
+cloud(newsStm, topic = 3, scale = c(2, 0.5))
+cloud(newsStm, topic = 4, scale = c(2, 0.5))
+cloud(newsStm, topic = 5, scale = c(2, 0.5))
+cloud(newsStm, topic = 6, scale = c(2, 0.5))
 
+# distribution of document probabilities for each topic (gamma is the probability that a document belongs in a topic)
+## code from https://juliasilge.com/blog/sherlock-holmes-stm/
+## becuase we have so many articles, this is not very valuable..shows that each topic is associated w/ 500-2000 articles
+probabilities <- tidy(newsStm, matrix = "gamma", document_names = names(newsTokens))
+
+ggplot(probabilities, aes(gamma, fill = as.factor(topic))) +
+  geom_histogram(alpha = 0.8, show.legend = FALSE) +
+  facet_wrap(~ topic, ncol = 3) +
+  labs(title = "Distribution of document probabilities for each topic",
+       y = "Number of Articles", x = expression(gamma))
+
+## Metadata/topic relation vizualization
+# estimate topic relationships
+effect <- estimateEffect(formula = 1:6 ~ ideology, stmobj = newsStm,
+                         metadata = newsConvert$meta, uncertainty = "Global")
+summary(effect)
+# topic 1: a 1 unit increase in idelogy leads to a .07 increase probability that a document is included in topic 1
+# topic 2: a 1 unit increase in ideology leads to a decreased chance that the document is included in this topic
+# topic 3: a 1 unit increase in ideology leads to a decreased chance that the doucment is included in this topic
+# topic 4: no significance
+# topic 5: a 1 unit increase in ideology leads to a decreased chance that the document is included in this topic
+# topic 6: a 1 unit increase in ideology leads to an increased chance that the document is included in this topic
+
+# expected topic proportions per topic
+## the expected proportion of a document that belongs to a topic as a function of a covariate,
+# or a first difference type estimate, where topic prevalence for a particular topic is contrasted for two groups 
+# (e.g., liberal versus conservative)
+plot(newsStm, type = "summary", xlim = c(0, 0.5))
+
+# plot effect of liberal versus conservative - topical prevelence contrast
+plot(effect, covariate = "ideology", topics = c(1:6),
+     model = newsStm, method = "difference", cov.value1 = 1,
+     cov.value2 = 5,
+     xlab = "More Conservative ... More Liberal",
+     main = "Effect of Liberal vs. Conservative", xlim = c(-0.4, 0.4),
+     labeltype = "custom", custom.labels = c("Police", "National Security",
+                                             "Human Interest", "Second Amendment", "Political", "School Shooting"))
+
+# topical content plot - comparing 2 topics
+## just comparing 1 and 3 becuase 1 is furthest left and 3 is furthest right
+plot(newsStm, type = "perspectives", topics = c(1, 3))
+
+# topical content plot - comparing 2 sides within singular topic
+newsContent <- stm(newsConvert$documents, newsConvert$vocab, K = topic.count,
+                   prevalence =~ ideology, content =~ ideology,
+                   max.em.its = 75, data = newsConvert$meta, init.type = "Spectral")
+
+plot(newsContent, type = "perspectives", topics = c(1))
+plot(newsContent, type = "perspectives", topics = c(2))
+plot(newsContent, type = "perspectives", topics = c(3))
+plot(newsContent, type = "perspectives", topics = c(4))
+plot(newsContent, type = "perspectives", topics = c(5))
+plot(newsContent, type = "perspectives", topics = c(6))
