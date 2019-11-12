@@ -55,6 +55,9 @@ h2oRF1 <- h2o.randomForest(
 )
 
 h2oRF1 
+##OOB RMSE is: 0.7896823
+##OOB MSE is: 0.6235981
+##OOB Mean Per-Class Error: 0.6707022
 
 # hyperparameter tuning to search a larger grid space for best possible model
 hyperGridRF <- list(
@@ -97,9 +100,9 @@ gridPerformanceRF <- h2o.getGrid(
 )
 
 gridPerformanceRF
-# the grid assessed XX models before stopping 
-# best model acheived mean per class error of: 
-# best model has xx max depth, xx minimum rows, xx mtries, xx sample rate
+# the grid assessed 66 models before stopping 
+# best model acheived mean per class error of:  0.6724623223850393 - around 67 percent
+# best model has 20 max depth, 3.0 minimum rows, -1 mtries, 0.8 sample rate
 
 
 ## adapting our RF to best hyperparameters
@@ -108,9 +111,9 @@ h2oRF2 <- h2o.randomForest(
   y = response,
   training_frame = trainH2o, 
   ntrees = 1000, 
-  max_depth = 10, 
+  max_depth = 20, 
   min_rows = 3, 
-  sample_rate = 0.632, 
+  sample_rate = 0.8, 
   nfolds = 10,
   fold_assignment = "Modulo", 
   keep_cross_validation_predictions = TRUE,
@@ -121,8 +124,7 @@ h2oRF2 <- h2o.randomForest(
 )
 
 h2oRF2
-# mean per class error =
-
+# mean per class error =  0.6707022 - no change
 
 
 ### GBM ###
