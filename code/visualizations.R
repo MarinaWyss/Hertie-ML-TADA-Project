@@ -1,11 +1,10 @@
 library(tidyverse)
-
-set.seed(123)  
+library(gridExtra)
+library(lubridate)
 
 data <- read.csv("preppedDataSet.csv")
 ideology <- read.csv("ideology.csv")
 data <- merge(data, ideology)
-
 data$topic <- as.factor(data$topic)
 data$X <- NULL
 
@@ -21,20 +20,7 @@ data <- data %>%
 
 # topic by ideology
 
-## prep data
-veryLiberal <- data %>% 
-  filter(ideology < 2)
-
-liberal <- data %>% 
-  filter(ideology >= 2 & ideology < 3)
-
-conservative <- data %>% 
-  filter(ideology >= 3 & ideology < 4)
-
-veryConservative <- data %>% 
-  filter(ideology >= 4)
-
-## plotting
+## all outlets
 overallPlot <- ggplot(data = data, 
                       aes(x = topic)) +
   geom_bar(aes(fill = topic),
@@ -42,17 +28,20 @@ overallPlot <- ggplot(data = data,
   geom_text(stat = "count", 
             aes(label = ..count..), 
             vjust = 2) +
-  scale_fill_manual(values = c("#d8b365", "#f6e8c3", "#DCE6F0", 
-                               "#84dee3", "#43bfde", "#0E77ED")) +
-  theme(axis.text.x = element_text(angle = 25,
-                                   size = 12)) +
+  scale_fill_manual(values = c("#762a83", "#af8dc3", "#e7d4e8", 
+                               "#d9f0d3", "#7fbf7b", "#1b7837")) +
+  theme(axis.text.x = element_text(angle = 20,
+                                   size = 10)) +
   labs(fill = "Topic",
        x = "Topic",
        y = "Count", 
-       title = "Distribution of topics")
+       title = "Distribution of Topics: All Outlets")
 
 overallPlot
 
+## very liberal
+veryLiberal <- data %>% 
+  filter(ideology < 2)
 
 veryLiberalPlot <- ggplot(data = veryLiberal, 
                           aes(x = topic)) +
@@ -61,17 +50,20 @@ veryLiberalPlot <- ggplot(data = veryLiberal,
   geom_text(stat = "count", 
             aes(label = ..count..), 
             vjust = 2) +
-  scale_fill_manual(values = c("#d8b365", "#f6e8c3", "#DCE6F0", 
-                               "#84dee3", "#43bfde", "#0E77ED")) +
-  theme(axis.text.x = element_text(angle = 25,
-                                   size = 12)) +
+  scale_fill_manual(values = c("#762a83", "#af8dc3", "#e7d4e8", 
+                               "#d9f0d3", "#7fbf7b", "#1b7837")) +
+  theme(axis.text.x = element_text(angle = 20,
+                                   size = 10)) +
   labs(fill = "Topic",
        x = "Topic",
        y = "Count", 
-       title = "Distribution of topics")
+       title = "Distribution of Topics: Very Liberal Outlets")
 
 veryLiberalPlot
 
+## liberal
+liberal <- data %>% 
+  filter(ideology >= 2 & ideology < 3)
 
 liberalPlot <- ggplot(data = liberal, 
                       aes(x = topic)) +
@@ -80,17 +72,20 @@ liberalPlot <- ggplot(data = liberal,
   geom_text(stat = "count", 
             aes(label = ..count..), 
             vjust = 2) +
-  scale_fill_manual(values = c("#d8b365", "#f6e8c3", "#DCE6F0", 
-                               "#84dee3", "#43bfde", "#0E77ED")) +
-  theme(axis.text.x = element_text(angle = 25,
-                                   size = 12)) +
+  scale_fill_manual(values = c("#762a83", "#af8dc3", "#e7d4e8", 
+                               "#d9f0d3", "#7fbf7b", "#1b7837")) +
+  theme(axis.text.x = element_text(angle = 20,
+                                   size = 10)) +
   labs(fill = "Topic",
        x = "Topic",
        y = "Count", 
-       title = "Distribution of topics")
+       title = "Distribution of Topics: Liberal Outlets")
 
 liberalPlot
 
+## conservative
+conservative <- data %>% 
+  filter(ideology >= 3 & ideology < 4)
 
 conservativePlot <- ggplot(data = conservative, 
                            aes(x = topic)) +
@@ -99,17 +94,20 @@ conservativePlot <- ggplot(data = conservative,
   geom_text(stat = "count", 
             aes(label = ..count..), 
             vjust = 2) +
-  scale_fill_manual(values = c("#d8b365", "#f6e8c3", "#DCE6F0", 
-                               "#84dee3", "#43bfde", "#0E77ED")) +
-  theme(axis.text.x = element_text(angle = 25,
-                                   size = 12)) +
+  scale_fill_manual(values = c("#762a83", "#af8dc3", "#e7d4e8", 
+                               "#d9f0d3", "#7fbf7b", "#1b7837")) +
+  theme(axis.text.x = element_text(angle = 20,
+                                   size = 10)) +
   labs(fill = "Topic",
        x = "Topic",
        y = "Count", 
-       title = "Distribution of topics")
+       title = "Distribution of Topics: Conservative Outlets")
 
 conservativePlot
 
+## very conservative
+veryConservative <- data %>% 
+  filter(ideology >= 4)
 
 veryConservativePlot <- ggplot(data = veryConservative, 
                                aes(x = topic)) +
@@ -118,76 +116,77 @@ veryConservativePlot <- ggplot(data = veryConservative,
   geom_text(stat = "count", 
             aes(label = ..count..), 
             vjust = 2) +
-  scale_fill_manual(values = c("#d8b365", "#f6e8c3", "#DCE6F0", 
-                               "#84dee3", "#43bfde", "#0E77ED")) +
-  theme(axis.text.x = element_text(angle = 25,
-                                   size = 12)) +
+  scale_fill_manual(values = c("#762a83", "#af8dc3", "#e7d4e8", 
+                               "#d9f0d3", "#7fbf7b", "#1b7837")) +
+  theme(axis.text.x = element_text(angle = 20,
+                                   size = 10)) +
   labs(fill = "Topic",
        x = "Topic",
        y = "Count", 
-       title = "Distribution of topics")
+       title = "Distribution of Topics: Very Conservative Outlets")
 
 veryConservativePlot
+
+grid.arrange(veryLiberalPlot, liberalPlot,
+             conservativePlot, veryConservativePlot)
 
 
 # topics over time
 
-## prep data
-timeData <- data %>% 
-  group_by(date) %>% 
-  mutate(propPolice = (sum(topic == "Police")/length(topic)),
-         propNationalSec = (sum(topic == "NationalSecurity")/length(topic)),
-         propHumanInterest = (sum(topic == "HumanInterest")/length(topic)),
-         propSecondAmendment = (sum(topic == "SecondAmendment")/length(topic)),
-         propPolitics = (sum(topic == "Politics")/length(topic)),
-         propSchoolShootings = (sum(topic == "SchoolShootings")/length(topic))
-  ) %>% 
-  ungroup()
+## all outlets
+allOutlets <- data %>%
+  mutate(week = week(date)) %>% 
+  group_by(week, topic) %>%
+  summarise(n = n()) %>%
+  mutate(perweek_freq = n / sum(n)) %>% 
+  ungroup() %>% 
+  mutate(week = as.Date(case_when(week == 22 ~ "2018-05-28",
+                                  week == 23 ~ "2018-06-04", 
+                                  week == 24 ~ "2018-06-11", 
+                                  week == 25 ~ "2018-06-18", 
+                                  week == 26 ~ "2018-06-25", 
+                                  week == 27 ~ "2018-07-02", 
+                                  week == 28 ~ "2018-07-09", 
+                                  week == 29 ~ "2018-07-16", 
+                                  week == 30 ~ "2018-07-23", 
+                                  week == 31 ~ "2018-07-30")))
 
-timeData <- timeData[ !duplicated(timeData$date), ]
-
-timeData <- timeData %>% 
-  mutate(date = as.character(date)) %>% 
-  select(starts_with("prop"), date) %>% 
-  pivot_longer(-date, 
-               names_to = "topic",
-               values_to = "prop") %>% 
-  mutate(date = as.Date(date))
-
-## plotting
-
-timePlot <- ggplot(timeData, aes(x = date, y = prop)) +
-  geom_area(aes(fill = as.factor(topic)), color = "black") + 
+timePlot <- ggplot(allOutlets,
+                   aes(x = week, y = perweek_freq, fill = topic)) + 
+  geom_area(alpha = 0.8, color = "black") + 
   scale_fill_manual(labels = c("Human Interest", "National Security", "Police", 
                                "Politics", "School Shootings", "Second Amendment"),
-                    values = c("#d8b365", "#f6e8c3", "#DCE6F0", 
-                               "#84dee3", "#43bfde", "#0E77ED")) +
+                    values = c("#762a83", "#af8dc3", "#e7d4e8", 
+                               "#d9f0d3", "#7fbf7b", "#1b7837")) +
   labs(fill = "Topics", 
-       x = "Date", 
+       x = "Week", 
        y = "Topics",
-       title = "Topic Distribution Over Time")
+       title = "Topic Distribution Over Time: All Outlets")
 
 timePlot
 
-
-# topics over time plot
 ## very liberal
-veryLiberalTime <- veryLiberal  %>%
-  group_by(date, topic) %>%
+veryLiberalTime <- veryLiberal %>%
+  mutate(week = week(date)) %>% 
+  group_by(week, topic) %>%
   summarise(n = n()) %>%
-  mutate(perday_freq = n / sum(n))
+  mutate(perweek_freq = n / sum(n)) 
 
-veryLiberalTime$date <- as.numeric(veryLiberalTime$date)
+veryLiberalTimePlot <- ggplot(veryLiberalTime, 
+                              aes(x = week, y = perweek_freq, fill = topic)) + 
+  geom_area(alpha = 0.8, color = "black") + 
+  scale_fill_manual(labels = c("Human Interest", "National Security", "Police", 
+                               "Politics", "School Shootings", "Second Amendment"),
+                    values = c("#762a83", "#af8dc3", "#e7d4e8", 
+                               "#d9f0d3", "#7fbf7b", "#1b7837")) +
+  labs(fill = "Topics", 
+       x = "Week of the Year", 
+       y = "Topics",
+       title = "Topic Distribution Over Time: Very Liberal Outlets")
 
-ggplot(veryLiberalTime, aes(x=date, y=perday_freq, fill=topic)) + 
-  geom_area(alpha=0.6 , size=1, colour="black") +
-  
-  labs(fill = "Topic", 
-       x = "Date", 
-       y = "Topic Frequency", 
-       title = "Very liberal outlets: distribution of topics over time")
+veryLiberalTimePlot
 
-##liberal
+## liberal
 liberalTime <- liberal  %>%
   group_by(date, topic) %>%
   summarise(n = n()) %>%

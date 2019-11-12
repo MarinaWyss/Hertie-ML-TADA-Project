@@ -10,6 +10,7 @@ runtime: shiny
 library(flexdashboard)
 library(shiny)
 library(tidyverse)
+library(scales)
 
 # data prep
 data <- read.csv("data/joinedDataSet.csv")
@@ -25,11 +26,21 @@ data <- data %>%
 
 shootings <- read.csv("data/demoData.csv")
 shootings <- shootings %>% 
-  select(date, city, total) %>% 
+  select(date, shooting, total) %>% 
   mutate(date = as.character(date))
 shootings$date <- as.Date(shootings$date)
 
 fullData <- left_join(data, shootings)
+
+betas <- read.csv("data/wordBetas.csv")
+betas <- betas %>% 
+  mutate(topic = case_when(
+    topic == 1 ~ "Police",
+    topic == 2 ~ "NationalSecurity",
+    topic == 3 ~ "HumanInterest",
+    topic == 4 ~ "SecondAmendment",
+    topic == 5 ~ "Politics",
+    topic == 6 ~ "SchoolShootings"))
 
 ```
 
@@ -61,13 +72,14 @@ Row
 renderValueBox({
   
   # preparing data
-  shootingData <- fullData[ !duplicated(fullData$city), ]
-  shootingData <- shootingData[complete.cases(shootingData), ]
+  shootingData <- fullData[ !duplicated(fullData$shooting), ]
+
+    shootingData <- shootingData[complete.cases(shootingData), ]
 
   shootingData <- shootingData %>%
     filter(date >= input$dateRange[1] & date <= input$dateRange[2]) %>% 
     group_by(date) %>% 
-    mutate(totalShootings = length(city),
+    mutate(totalShootings = length(shooting),
          totalDeadInjured = sum(total)) %>% 
     ungroup() 
     
@@ -89,13 +101,14 @@ renderValueBox({
 renderValueBox({
   
   # preparing data
-  shootingData <- fullData[ !duplicated(fullData$city), ]
+  shootingData <- fullData[ !duplicated(fullData$shooting), ]
+
   shootingData <- shootingData[complete.cases(shootingData), ]
 
   shootingData <- shootingData %>%
     filter(date >= input$dateRange[1] & date <= input$dateRange[2]) %>% 
     group_by(date) %>% 
-    mutate(totalShootings = length(city),
+    mutate(totalShootings = length(shooting),
          totalDeadInjured = sum(total)) %>% 
     ungroup() 
     
@@ -136,7 +149,7 @@ renderPlot({
                 aes(label = ..count..), 
                 vjust = 2) +
       scale_fill_manual(values = c("#d8b365", "#f6e8c3", "#DCE6F0", 
-                                   "#84dee3", "#43bfde", "#0E77ED")) +
+                                   "#84dee3", "#519CED", "#0E77ED")) +
       theme(axis.text.x = element_text(angle = 25,
                                        size = 12)) +
       labs(fill = "Topic",
@@ -148,10 +161,10 @@ renderPlot({
 ```
 
 
-Words by topic {data-icon="fa-list"}
+Words per Topic {data-icon="fa-list"}
 ====================================================================
 
-### Which words have the highest probability of belonging to each topic?
+### Select a topic to see which words have the highest probability of belonging to that topic.
 
 ```{r}
 
@@ -162,19 +175,17 @@ fillCol(height = 600, flex = c(NA, 1),
   plotOutput("topicPlot", height = "100%")
 )
 
-
-# output$topicPlot <- renderPlot({
-#    td_beta %>%
-#        filter(topic == input$chooseTopic) %>%
-#        top_n(15, beta) %>%
-#        mutate(term = reorder(term, beta)) %>%
-#        ggplot(aes(term, beta, fill = beta)) +
-#        geom_col(show.legend = FALSE) +
-#        scale_fill_gradient(low = "#5FBA7D", high = "#108AEC") +
-#        scale_y_continuous(expand = c(0,0),
-#                           labels = percent_format()) +
-#        coord_flip() +
-#        theme_minimal(base_size = 18) +
-#        labs(x = NULL, y = expression(beta))
-# })
+output$topicPlot <- renderPlot({
+   betas %>%
+       filter(topic == input$chooseTopic) %>%
+       top_n(20, beta) %>%
+       mutate(term = reorder(term, beta)) %>%
+       ggplot(aes(term, beta, fill = beta)) +
+       geom_col(show.legend = FALSE) +
+       scale_fill_gradient(low = "#84dee3", high = "#0E77ED") +
+       scale_y_continuous(expand = c(0, 0),
+                          labels = percent_format()) +
+       coord_flip() +
+       labs(x = NULL, y = expression(beta))
+})
 ```

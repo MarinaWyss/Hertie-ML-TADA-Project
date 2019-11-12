@@ -1,59 +1,99 @@
-date,location,zip,medianIncome,countyVote,dead,injusted,total,children,murderSuicide
-2018-10-01,"Chicago, Illinois",60632,"$42,335 ",No,2,2,4,No,No
-2018-10-03,"Florence, South Carolina",29501,"$48,833 ",Yes,2,6,8,No,No
-2018-10-03,"Philadelphia, Pennsylvania",20874,"$86,718 ",No,1,4,5,No,No
-2018-10-04,"Espanola, New Mexico",87566,"$33,203 ",No,1,3,4,No,No
-2018-10-04,"Swainsboro, Georgia",30401,"$33,677 ",Yes,0,4,4,Yes,No
-2018-10-06,"Tulsa, Oklahoma",74145,"$47,120 ",Yes,0,4,4,No,No
-2018-10-06,"Houston, Texas",77054,"$48,681 ",No,1,3,4,No,No
-2018-10-06,"Oakland, California",66102,"$32,514 ",No,0,6,6,No,No
-2018-10-08,"Birmingham, Alabama",35206,"$32,537 ",No,0,4,4,No,No
-2018-10-12,"Spartanburg, South Carolina",29301,"$41,867 ",Yes,0,6,6,No,No
-2018-10-12,"Las Vegas, Nevada",89109,"$46,875 ",No,0,4,4,No,No
-2018-10-13,"St. Louis, Missouri",63137,"$36,849 ",No,0,4,4,No,No
-2018-10-13,"Taft, Texas",78390,"$39,149 ",Yes,4,1,5,No,No
-2018-10-14,"Fort Worth, Texas",76105,"$28,843 ",Yes,0,4,4,Yes,No
-2018-10-14,"East Palo Alto, California",94303,"$98,361 ",No,2,2,4,No,No
-2018-10-14,"North Las Vegas, Nevada",89032,"$56,978 ",No,3,1,4,No,No
-2018-10-15,"Columbia, Tennessee",38401,"$49,028 ",Yes,5,0,5,Yes,Yes
-2018-10-16,"Atlanta, Georgia",30312,"$48,802 ",No,0,4,4,No,No
-2018-10-21,"Jacksonville, Florida",32202,"$28,025 ",Yes,0,6,6,No,No
-2018-10-21,"Lakewood, Washington",98499,"$39,955 ",No,1,3,4,No,No
-2018-10-22,"Chicago, Illinois",60644,"$27,617 ",No,0,6,6,No,No
-2018-10-24,"Chicago, Illinois",60637,"$28,024 ",No,0,5,5,No,No
-2018-10-26,"Jersey City, New Jersey",7305,"$49,453 ",No,1,3,4,Yes,No
-2018-10-27,"Pittsburgh, Pennsylvania",15217,"$73,294 ",No,11,6,17,No,No
-2018-10-27,"Memphis, Tennessee",38141,"$49,839 ",No,0,5,5,Yes,No
-2018-10-28,"El Dorado, Arkansas",71730,"$41,444 ",Yes,2,2,4,No,No
-2018-10-29,"Riverside, California",92507,"$44,912 ",No,0,7,7,No,No
-2018-10-30,"Vallejo, California",94591,"$78,628 ",No,2,3,5,No,No
-2018-10-30,"Los Angeles, California",90044,"$32,278 ",No,0,5,5,No,No
-2018-10-31,"Detroit, Michigan",48234,"$25,506 ",No,1,3,4,Yes,No
-2018-11-01,"Minneapolis, Minnesota",55412,"$44,069 ",No ,0,5,5,No,No
-2018-11-01,"Springfield, Missouri",65803,"$35,871 ",No,2,2,4,No,No
-2018-11-02,"Long Beach, California",90805,"$47,981 ",No,0,4,4,Yes,No
-2018-11-02,"Tallahassee, Florida",32303,"$47,320 ",No,3,5,8,No,Yes
-2018-11-03,"Watertown, New York",13601,"$46,365 ",Yes,0,5,5,No,No
-2018-11-07,"Thousand Oaks, California",91361,"$116,114 ",No,13,12,25,No,Yes
-2018-11-10,"Memphis, Tennessee",38103,"$64,338 ",No,2,4,6,Yes,No
-2018-11-11,"Globe, Arizona",85501,"$41,485 ",Yes,3,3,5,No,No
-2018-11-11,"Robbins, Illinois",60472,"$30,064 ",No,1,4,5,No,No
-2018-11-12,"Dunn, North Carolina",28334,"$36,840 ",Yes,3,1,4,No,No
-2018-11-13,"Indianapolis, Indiana",46231,"$62,390 ",No,2,2,4,No,No
-2018-11-13,"Tsayatoh, New Mexico",87301,"$42,325 ",No,4,1,5,No,Yes
-2018-11-14,"Baton Rouge, Louisiana",70802,"$24,920 ",No,3,1,4,No,No
-2018-11-16,"Little Rock, Arkansas",72204,"$33,110 ",No,3,1,4,Yes,No
-2018-11-16,"Wheatland, Wisconsin",53168,"$74,088 ",Yes,1,3,4,No,No
-2018-11-18,"Los Angeles, California",90002,"$34,000 ",No,1,3,4,Yes,No
-2018-11-19,"Denver, Colorado",80205,"$62,865 ",No,1,3,4,No,No
-2018-11-19,"Philadelphia, Pennsylvania",19143,"$32,741 ",No,4,0,4,Yes,No
-2018-11-19,"Chicago, Illinois",60616,"$46,340 ",No,4,0,4,No,No
-2018-11-21,"St. Louis, Missouri",63115,"$23,780 ",No,0,4,4,No,No
-2018-11-22,"Fort Wayne, Indiana",46816,"$34,989 ",Yes,3,2,5,No,No
-2018-11-23,"Miami, Florida",33142,"$23,346 ",No,2,2,4,Yes,No
-2018-11-24,"Orlando, Florida",32839,"$34,972 ",No,2,2,4,No,No
-2018-11-25,"Houston, Texas",77018,"$81,565 ",No,1,6,7,Yes,No
-2018-11-25,"Demopolis, Alabama",36732,"$27,377 ",No,2,2,4,No,No
-2018-11-25,"Oakland, California",94607,"$41,870 ",No,0,4,4,No,No
-2018-11-26,"Powell, Tennessee",75153,"$36,650 ",Yes,0,4,4,Yes,No
-2018-11-22,"Hoover, Alabama",35244,"$81,038 ",No,1,2,3,No,No
+date,total,city,shooting
+2018-07-31,5,Gardena,shooting1
+2018-07-30,4,Savannah,shooting2
+2018-07-30,4,Chicago,shooting3
+2018-07-29,4,York,shooting4
+2018-07-29,5,Phoenix,shooting5
+2018-07-29,4,Lansing,shooting6
+2018-07-28,10,New Orleans,shooting7
+2018-07-28,6,Los Angeles,shooting8
+2018-07-27,4,Chicago,shooting9
+2018-07-27,5,Robstown,shooting10
+2018-07-26,7,Cleveland,shooting11
+2018-07-26,4,Oakland,shooting12
+2018-07-26,6,Dallas,shooting13
+2018-07-25,4,New Orleans,shooting14
+2018-07-23,5,Chicago,shooting15
+2018-07-21,4,Baltimore,shooting16
+2018-07-21,7,Chicago,shooting17
+2018-07-20,5,Sunnyside,shooting18
+2018-07-20,4,Elizabeth,shooting19
+2018-07-18,4,Oklahoma City,shooting20
+2018-07-16,6,Palm Beach Gardens,shooting21
+2018-07-16,5,Philadelphia,shooting22
+2018-07-16,5,Washington,shooting23
+2018-07-15,4,Denver,shooting24
+2018-07-15,5,Chattanooga,shooting25
+2018-07-14,4,Fort Washington,shooting26
+2018-07-13,4,Richmond,shooting27
+2018-07-12,5,Memphis,shooting28
+2018-07-11,4,Houston,shooting29
+2018-07-11,4,Reddick,shooting30
+2018-07-09,5,Prices Corner,shooting31
+2018-07-09,5,Orlando,shooting32
+2018-07-08,6,Lowndes County,shooting33
+2018-07-08,4,Memphis,shooting34
+2018-07-07,5,Wetumpka,shooting35
+2018-07-05,4,Brooklyn,shooting36
+2018-07-05,4,Albany,shooting37
+2018-07-05,6,Los Angeles,shooting38
+2018-07-05,6,Virginia Beach,shooting39
+2018-07-05,6,Lima,shooting40
+2018-07-04,4,Gary,shooting41
+2018-07-04,4,Atlanta,shooting42
+2018-07-03,6,Saint Louis,shooting43
+2018-07-03,4,Washington,shooting44
+2018-07-02,4,Buffalo,shooting45
+2018-07-01,6,Chicago,shooting46
+2018-06-30,7,Ashburn,shooting47
+2018-06-30,6,Baltimore,shooting48
+2018-06-30,5,Jersey City,shooting49
+2018-06-28,7,Annapolis,shooting50
+2018-06-27,4,Oakland,shooting51
+2018-06-27,4,San Antonio,shooting52
+2018-06-27,4,Hartford,shooting53
+2018-06-25,6,Chicago,shooting54
+2018-06-24,7,Sanford,shooting55
+2018-06-24,4,Punta Gorda,shooting56
+2018-06-24,4,Indiantown,shooting57
+2018-06-24,4,Palm Beach Gardens,shooting58
+2018-06-24,4,Gary,shooting59
+2018-06-24,5,Sandusky,shooting60
+2018-06-23,4,Wichita,shooting61
+2018-06-23,5,Chicago,shooting62
+2018-06-23,4,Covington,shooting63
+2018-06-22,4,Homestead,shooting64
+2018-06-21,4,San Bernardino,shooting65
+2018-06-21,4,Morganza,shooting66
+2018-06-21,4,Chicago,shooting67
+2018-06-20,5,Modesto,shooting68
+2018-06-19,4,Huntsville,shooting69
+2018-06-18,3,Lakeside,shooting70
+2018-06-18,5,Chicago,shooting71
+2018-06-18,4,Bloomington,shooting72
+2018-06-17,4,Charlotte,shooting73
+2018-06-17,23,Trenton,shooting74
+2018-06-17,4,Macon,shooting75
+2018-06-17,4,Chicago,shooting76
+2018-06-14,4,Philadelphia,shooting77
+2018-06-14,5,Union City,shooting78
+2018-06-14,5,Tracy,shooting79
+2018-06-14,5,Buffalo,shooting80
+2018-06-14,4,Westminster,shooting81
+2018-06-12,4,Bronx,shooting82
+2018-06-11,4,Montgomery,shooting83
+2018-06-11,6,Orlando,shooting84
+2018-06-10,6,Bradenton,shooting85
+2018-06-10,6,Valley Village,shooting86
+2018-06-10,5,Indianapolis,shooting87
+2018-06-10,7,Aurora,shooting88
+2018-06-10,4,Bloomington,shooting89
+2018-06-10,6,Chicago,shooting90
+2018-06-09,4,Boston,shooting91
+2018-06-09,4,Kannapolis,shooting92
+2018-06-09,5,Philadelphia,shooting93
+2018-06-05,4,Jacksonville,shooting94
+2018-06-03,5,Dallas,shooting95
+2018-06-03,4,Chicago,shooting96
+2018-06-02,7,Omaha,shooting97
+2018-06-02,5,Buffalo,shooting98
