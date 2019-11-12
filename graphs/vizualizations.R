@@ -1,4 +1,5 @@
 library(tidyverse)
+library(gridExtra)
 
 set.seed(123)  
 
@@ -63,11 +64,11 @@ veryLiberalPlot <- ggplot(data = veryLiberal,
   scale_fill_manual(values = c("#d8b365", "#f6e8c3", "#DCE6F0", 
                                "#84dee3", "#43bfde", "#0E77ED")) +
   theme(axis.text.x = element_text(angle = 25,
-                                   size = 12)) +
+                                   size = 10)) +
   labs(fill = "Topic",
        x = "Topic",
        y = "Count", 
-       title = "Distribution of topics")
+       title = "Distribution of topics; very liberal")
 
 veryLiberalPlot
 
@@ -82,11 +83,11 @@ liberalPlot <- ggplot(data = liberal,
   scale_fill_manual(values = c("#d8b365", "#f6e8c3", "#DCE6F0", 
                                "#84dee3", "#43bfde", "#0E77ED")) +
   theme(axis.text.x = element_text(angle = 25,
-                                   size = 12)) +
+                                   size = 10)) +
   labs(fill = "Topic",
        x = "Topic",
        y = "Count", 
-       title = "Distribution of topics")
+       title = "Distribution of topics; liberal")
 
 liberalPlot
 
@@ -101,11 +102,11 @@ conservativePlot <- ggplot(data = conservative,
   scale_fill_manual(values = c("#d8b365", "#f6e8c3", "#DCE6F0", 
                                "#84dee3", "#43bfde", "#0E77ED")) +
   theme(axis.text.x = element_text(angle = 25,
-                                   size = 12)) +
+                                   size = 10)) +
   labs(fill = "Topic",
        x = "Topic",
        y = "Count", 
-       title = "Distribution of topics")
+       title = "Distribution of topics; conservative")
 
 conservativePlot
 
@@ -120,10 +121,12 @@ veryConservativePlot <- ggplot(data = veryConservative,
   scale_fill_manual(values = c("#d8b365", "#f6e8c3", "#DCE6F0", 
                                "#84dee3", "#43bfde", "#0E77ED")) +
   theme(axis.text.x = element_text(angle = 25,
-                                   size = 12)) +
+                                   size = 10)) +
   labs(fill = "Topic",
        x = "Topic",
        y = "Count", 
-       title = "Distribution of topics")
+       title = "Distribution of topics; very conservative")
 
 veryConservativePlot
+
+grid.arrange(veryLiberalPlot, liberalPlot, conservativePlot, veryConservativePlot, ncol=2)
