@@ -9,8 +9,7 @@ library(tools)
 library(tidytext)
 
 # your filepath here
-path <- "/Users/AEMagaard/Documents/Hertie/Semester 3/Text Analysis/Project/english"
-
+path <- "/Users/Jan/Desktop/Marina/Hertie-ML-TADA-Project/newspaper-data/English/finalFiles"
 
 # load data
 ## create list of all outlets
