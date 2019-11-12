@@ -22,7 +22,7 @@ data <- data %>%
 
 ## all outlets
 overallPlot <- ggplot(data = data, 
-                          aes(x = topic)) +
+                      aes(x = topic)) +
   geom_bar(aes(fill = topic),
            color = "black") +
   geom_text(stat = "count", 
@@ -44,7 +44,7 @@ veryLiberal <- data %>%
   filter(ideology < 2)
 
 veryLiberalPlot <- ggplot(data = veryLiberal, 
-                      aes(x = topic)) +
+                          aes(x = topic)) +
   geom_bar(aes(fill = topic),
            color = "black") +
   geom_text(stat = "count", 
@@ -66,7 +66,7 @@ liberal <- data %>%
   filter(ideology >= 2 & ideology < 3)
 
 liberalPlot <- ggplot(data = liberal, 
-                          aes(x = topic)) +
+                      aes(x = topic)) +
   geom_bar(aes(fill = topic),
            color = "black") +
   geom_text(stat = "count", 
@@ -88,7 +88,7 @@ conservative <- data %>%
   filter(ideology >= 3 & ideology < 4)
 
 conservativePlot <- ggplot(data = conservative, 
-                      aes(x = topic)) +
+                           aes(x = topic)) +
   geom_bar(aes(fill = topic),
            color = "black") +
   geom_text(stat = "count", 
@@ -110,7 +110,7 @@ veryConservative <- data %>%
   filter(ideology >= 4)
 
 veryConservativePlot <- ggplot(data = veryConservative, 
-                           aes(x = topic)) +
+                               aes(x = topic)) +
   geom_bar(aes(fill = topic),
            color = "black") +
   geom_text(stat = "count", 

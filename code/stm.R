@@ -7,8 +7,6 @@ library(quanteda)
 library(stm)
 library(tools)
 library(tidytext)
-library(wordcloud)
-
 
 # your filepath here
 path <- "/Users/marinabennett/Desktop/Hertie/1. Fall 2019/Machine Learning/Hertie-ML-TADA-Project/newspaper-data/English/finalFiles"
@@ -146,12 +144,14 @@ newsStm <- stm(newsConvert$documents,
               data = newsConvert$meta, 
               init.type = "Spectral")
 
+
 # view results
 data.frame(t(labelTopics(newsStm, n = 20)$prob))
 
 labelTopics(newsStm, c(1:6))
 
-plot(newsStm, type = "summary", topics = c(1:6), xlim = c(0, 6))
+plot(newsStm, type = "summary", topics = c(1:5), xlim = c(0, 4))
+
 
 # estimate topic relationships
 effect <- estimateEffect(formula = 1:20 ~ outlet_date, stmobj = newsStm,
@@ -228,27 +228,27 @@ ggplot(probabilities, aes(gamma, fill = as.factor(topic))) +
 effect <- estimateEffect(formula = 1:6 ~ ideology, stmobj = newsStm,
                          metadata = newsConvert$meta, uncertainty = "Global")
 summary(effect)
-  # topic 1: a 1 unit increase in idelogy leads to a .07 increase probability that a document is included in topic 1
-  # topic 2: a 1 unit increase in ideology leads to a decreased chance that the document is included in this topic
-  # topic 3: a 1 unit increase in ideology leads to a decreased chance that the doucment is included in this topic
-  # topic 4: no significance
-  # topic 5: a 1 unit increase in ideology leads to a decreased chance that the document is included in this topic
-  # topic 6: a 1 unit increase in ideology leads to an increased chance that the document is included in this topic
+# topic 1: a 1 unit increase in idelogy leads to a .07 increase probability that a document is included in topic 1
+# topic 2: a 1 unit increase in ideology leads to a decreased chance that the document is included in this topic
+# topic 3: a 1 unit increase in ideology leads to a decreased chance that the doucment is included in this topic
+# topic 4: no significance
+# topic 5: a 1 unit increase in ideology leads to a decreased chance that the document is included in this topic
+# topic 6: a 1 unit increase in ideology leads to an increased chance that the document is included in this topic
 
 # expected topic proportions per topic
 ## the expected proportion of a document that belongs to a topic as a function of a covariate,
-  # or a first difference type estimate, where topic prevalence for a particular topic is contrasted for two groups 
-  # (e.g., liberal versus conservative)
+# or a first difference type estimate, where topic prevalence for a particular topic is contrasted for two groups 
+# (e.g., liberal versus conservative)
 plot(newsStm, type = "summary", xlim = c(0, 0.5))
 
 # plot effect of liberal versus conservative - topical prevelence contrast
 plot(effect, covariate = "ideology", topics = c(1:6),
-        model = newsStm, method = "difference", cov.value1 = 1,
-        cov.value2 = 5,
-        xlab = "More Conservative ... More Liberal",
-        main = "Effect of Liberal vs. Conservative", xlim = c(-0.4, 0.4),
-        labeltype = "custom", custom.labels = c("Police", "National Security",
-                                          "Human Interest", "Second Amendment", "Political", "School Shooting"))
+     model = newsStm, method = "difference", cov.value1 = 1,
+     cov.value2 = 5,
+     xlab = "More Conservative ... More Liberal",
+     main = "Effect of Liberal vs. Conservative", xlim = c(-0.4, 0.4),
+     labeltype = "custom", custom.labels = c("Police", "National Security",
+                                             "Human Interest", "Second Amendment", "Political", "School Shooting"))
 
 # topical content plot - comparing 2 topics
 ## just comparing 1 and 3 becuase 1 is furthest left and 3 is furthest right
@@ -256,8 +256,8 @@ plot(newsStm, type = "perspectives", topics = c(1, 3))
 
 # topical content plot - comparing 2 sides within singular topic
 newsContent <- stm(newsConvert$documents, newsConvert$vocab, K = topic.count,
-                       prevalence =~ ideology, content =~ ideology,
-                       max.em.its = 75, data = newsConvert$meta, init.type = "Spectral")
+                   prevalence =~ ideology, content =~ ideology,
+                   max.em.its = 75, data = newsConvert$meta, init.type = "Spectral")
 
 plot(newsContent, type = "perspectives", topics = c(1))
 plot(newsContent, type = "perspectives", topics = c(2))
@@ -265,5 +265,3 @@ plot(newsContent, type = "perspectives", topics = c(3))
 plot(newsContent, type = "perspectives", topics = c(4))
 plot(newsContent, type = "perspectives", topics = c(5))
 plot(newsContent, type = "perspectives", topics = c(6))
-
-
