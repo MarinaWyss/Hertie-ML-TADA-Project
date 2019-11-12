@@ -10,31 +10,43 @@ runtime: shiny
 library(flexdashboard)
 library(shiny)
 library(tidyverse)
+library(scales)
 
 # data prep
 data <- read.csv("data/joinedDataSet.csv")
 data$date <- as.Date(data$date)
 data <- data %>% 
   mutate(topic = case_when(
-    topic == 1 ~ "HumanInterest",
+    topic == 1 ~ "Police",
     topic == 2 ~ "NationalSecurity",
-    topic == 3 ~ "Police",
-    topic == 4 ~ "Politics",
-    topic == 5 ~ "PittsburghShooting"))
+    topic == 3 ~ "HumanInterest",
+    topic == 4 ~ "SecondAmendment",
+    topic == 5 ~ "Politics",
+    topic == 6 ~ "SchoolShootings"))
 
 shootings <- read.csv("data/demoData.csv")
 shootings <- shootings %>% 
-  select(date, zip, total) %>% 
+  select(date, shooting, total) %>% 
   mutate(date = as.character(date))
 shootings$date <- as.Date(shootings$date)
 
 fullData <- left_join(data, shootings)
 
+betas <- read.csv("data/wordBetas.csv")
+betas <- betas %>% 
+  mutate(topic = case_when(
+    topic == 1 ~ "Police",
+    topic == 2 ~ "NationalSecurity",
+    topic == 3 ~ "HumanInterest",
+    topic == 4 ~ "SecondAmendment",
+    topic == 5 ~ "Politics",
+    topic == 6 ~ "SchoolShootings"))
+
 ```
 
 Sidebar {.sidebar}
 =======================================================================
-Choose a news outlet to display their distribution of topics and a time frame between Oct. 1 and Nov. 30, 2018.
+Choose a news outlet to display their distribution of topics and a time frame between June 1st and July 31st, 2018.
 
 ```{r}
 selectInput("outlet", 
@@ -60,12 +72,12 @@ selectInput("outlet",
                   selected = "all")
 
 dateRangeInput("dateRange", "Date range:",
-                     start = "2018-10-01",
-                     end   = "2018-11-30")
+                     start = "2018-06-01",
+                     end   = "2018-07-31")
 ```
 
 
-Dashboard
+Dashboard {data-icon="fa-bar-chart"}
 =======================================================================
 
 Row
@@ -77,13 +89,13 @@ Row
 renderValueBox({
   
   # preparing data
-  shootingData <- fullData[ !duplicated(fullData$zip), ]
+  shootingData <- fullData[ !duplicated(fullData$shooting), ]
   shootingData <- shootingData[complete.cases(shootingData), ]
 
   shootingData <- shootingData %>%
     filter(date >= input$dateRange[1] & date <= input$dateRange[2]) %>% 
     group_by(date) %>% 
-    mutate(totalShootings = length(zip),
+    mutate(totalShootings = length(shooting),
          totalDeadInjured = sum(total)) %>% 
     ungroup() 
     
@@ -105,13 +117,13 @@ renderValueBox({
 renderValueBox({
   
   # preparing data
-  shootingData <- fullData[ !duplicated(fullData$zip), ]
+  shootingData <- fullData[ !duplicated(fullData$shooting), ]
   shootingData <- shootingData[complete.cases(shootingData), ]
 
   shootingData <- shootingData %>%
     filter(date >= input$dateRange[1] & date <= input$dateRange[2]) %>% 
     group_by(date) %>% 
-    mutate(totalShootings = length(zip),
+    mutate(totalShootings = length(shooting),
          totalDeadInjured = sum(total)) %>% 
     ungroup() 
     
@@ -152,14 +164,42 @@ renderPlot({
                 aes(label = ..count..), 
                 vjust = 2) +
       scale_fill_manual(values = c("#d8b365", "#f6e8c3", "#DCE6F0", 
-                                   "#84dee3", "#43bfde", "#0E77ED")) +
+                                   "#84dee3", "#519CED", "#0E77ED")) +
       theme(axis.text.x = element_text(angle = 25,
                                        size = 12)) +
       labs(fill = "Topic",
            x = "Topic",
-           y = "Count", 
-           title = "Distribution of topics")
+           y = "Count")
     
     plt
+})
+```
+
+Words per Topic {data-icon="fa-list"}
+====================================================================
+
+### Select a topic to see which words have the highest probability of belonging to that topic.
+
+```{r}
+
+fillCol(height = 600, flex = c(NA, 1), 
+  inputPanel(
+    selectizeInput("chooseTopic", "Choose a topic", choices = unique(fullData$topic))
+  ),
+  plotOutput("topicPlot", height = "100%")
+)
+
+output$topicPlot <- renderPlot({
+   betas %>%
+       filter(topic == input$chooseTopic) %>%
+       top_n(20, beta) %>%
+       mutate(term = reorder(term, beta)) %>%
+       ggplot(aes(term, beta, fill = beta)) +
+       geom_col(show.legend = FALSE) +
+       scale_fill_gradient(low = "#84dee3", high = "#0E77ED") +
+       scale_y_continuous(expand = c(0, 0),
+                          labels = percent_format()) +
+       coord_flip() +
+       labs(x = NULL, y = expression(beta))
 })
 ```

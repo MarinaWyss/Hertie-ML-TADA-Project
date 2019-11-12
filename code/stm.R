@@ -11,7 +11,7 @@ library(wordcloud)
 
 
 # your filepath here
-path <- "/Users/madelinebrady/Desktop/Fall 2019/Hertie-ML-TADA-Project/newspaper-data/English"
+path <- "/Users/marinabennett/Desktop/Hertie/1. Fall 2019/Machine Learning/Hertie-ML-TADA-Project/newspaper-data/English/finalFiles"
 
 # load data
 ## create list of all outlets
@@ -174,6 +174,35 @@ preppedDataSet <- joinedDataSet %>%
   arrange(date)
 
 write.csv(preppedDataSet, "preppedDataSet.csv")
+
+
+# words associated with each topic
+wordBetas <- tidy(newsStm)
+
+wordBetas %>%
+  group_by(topic) %>%
+  top_n(20, beta) %>%
+  ungroup() %>%
+  mutate(topic = case_when(
+    topic == 1 ~ "Police",
+    topic == 2 ~ "NationalSecurity",
+    topic == 3 ~ "HumanInterest",
+    topic == 4 ~ "SecondAmendment",
+    topic == 5 ~ "Politics", 
+    topic == 6 ~ "SchoolShootings"),
+         term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(term, beta, fill = as.factor(topic))) +
+  geom_col(show.legend = FALSE, color = "black") +
+  facet_wrap(~ topic, scales = "free_y") +
+  scale_fill_manual(values = c("#762a83", "#af8dc3", "#e7d4e8", 
+                               "#d9f0d3", "#7fbf7b", "#1b7837")) +
+  coord_flip() +
+  scale_x_reordered() +
+  labs(x = NULL, y = expression(beta),
+       title = "Highest Word Probabilities for Each Topic")
+
+
+
 
 # word cloud for each topic
 cloud(newsStm, topic = 1, scale = c(2, 0.5))
