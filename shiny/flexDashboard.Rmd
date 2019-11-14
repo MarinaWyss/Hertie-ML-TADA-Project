@@ -54,24 +54,7 @@ Choose a news outlet to display their distribution of topics and a time frame be
 ```{r}
 selectInput("outlet", 
                   label = "Choose a news outlet",
-                  choices = c("all",
-                              "abcnews", 
-                              "breitbart",
-                              "cnbc", 
-                              "dailykos",
-                              "foxnews",
-                              "huffingtonpost",
-                              "infowars",
-                              "motherjones",
-                              "newsweek",
-                              "newyorker",
-                              "nytimes",
-                              "politico",
-                              "thehill",
-                              "thinkprogress",
-                              "townhall",
-                              "vice",
-                              "washingtonpost"),
+                  choices = unique(fullData$outlet),
                   selected = "all")
 
 dateRangeInput("dateRange", "Date range:",
@@ -89,7 +72,8 @@ renderValueBox({
   
   # preparing data
   shootingData <- fullData[ !duplicated(fullData$shooting), ]
-  shootingData <- shootingData[complete.cases(shootingData), ]
+
+    shootingData <- shootingData[complete.cases(shootingData), ]
 
   shootingData <- shootingData %>%
     filter(date >= input$dateRange[1] & date <= input$dateRange[2]) %>% 
@@ -117,6 +101,7 @@ renderValueBox({
   
   # preparing data
   shootingData <- fullData[ !duplicated(fullData$shooting), ]
+
   shootingData <- shootingData[complete.cases(shootingData), ]
 
   shootingData <- shootingData %>%
@@ -174,6 +159,7 @@ renderPlot({
     plt
 })
 ```
+
 
 Words per Topic {data-icon="fa-list"}
 ====================================================================
