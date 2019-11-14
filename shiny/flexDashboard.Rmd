@@ -44,8 +44,11 @@ betas <- betas %>%
 
 ```
 
-Sidebar {.sidebar}
+Dashboard {data-icon="fa-bar-chart"}
 =======================================================================
+
+Inputs {.sidebar}
+-------------------------------------
 Choose a news outlet to display their distribution of topics and a time frame between June 1st and July 31st, 2018.
 
 ```{r}
@@ -75,10 +78,6 @@ dateRangeInput("dateRange", "Date range:",
                      start = "2018-06-01",
                      end   = "2018-07-31")
 ```
-
-
-Dashboard {data-icon="fa-bar-chart"}
-=======================================================================
 
 Row
 -----------------------------------------------------------------------
@@ -145,6 +144,7 @@ Row
 ### Distribution of topics
 
 ```{r plot}
+
 renderPlot({
     
     if(input$outlet == "all"){
