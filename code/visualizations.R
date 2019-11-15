@@ -170,7 +170,18 @@ veryLiberalTime <- veryLiberal %>%
   mutate(week = week(date)) %>% 
   group_by(week, topic) %>%
   summarise(n = n()) %>%
-  mutate(perweek_freq = n / sum(n)) 
+  mutate(perweek_freq = n / sum(n)) %>% 
+  ungroup() %>% 
+  mutate(week = as.Date(case_when(week == 22 ~ "2018-05-28",
+                                  week == 23 ~ "2018-06-04", 
+                                  week == 24 ~ "2018-06-11", 
+                                  week == 25 ~ "2018-06-18", 
+                                  week == 26 ~ "2018-06-25", 
+                                  week == 27 ~ "2018-07-02", 
+                                  week == 28 ~ "2018-07-09", 
+                                  week == 29 ~ "2018-07-16", 
+                                  week == 30 ~ "2018-07-23", 
+                                  week == 31 ~ "2018-07-30")))
 
 veryLiberalTimePlot <- ggplot(veryLiberalTime, 
                               aes(x = week, y = perweek_freq, fill = topic)) + 
@@ -187,55 +198,97 @@ veryLiberalTimePlot <- ggplot(veryLiberalTime,
 veryLiberalTimePlot
 
 ## liberal
-liberalTime <- liberal  %>%
-  group_by(date, topic) %>%
+liberalTime <- liberal %>%
+  mutate(week = week(date)) %>% 
+  group_by(week, topic) %>%
   summarise(n = n()) %>%
-  mutate(perday_freq = n / sum(n))
+  mutate(perweek_freq = n / sum(n)) %>% 
+  ungroup() %>% 
+  mutate(week = as.Date(case_when(week == 22 ~ "2018-05-28",
+                                  week == 23 ~ "2018-06-04", 
+                                  week == 24 ~ "2018-06-11", 
+                                  week == 25 ~ "2018-06-18", 
+                                  week == 26 ~ "2018-06-25", 
+                                  week == 27 ~ "2018-07-02", 
+                                  week == 28 ~ "2018-07-09", 
+                                  week == 29 ~ "2018-07-16", 
+                                  week == 30 ~ "2018-07-23", 
+                                  week == 31 ~ "2018-07-30")))
 
-liberalTime$date <- as.numeric(liberalTime$date)
+liberalTimePlot <- ggplot(liberalTime, 
+                              aes(x = week, y = perweek_freq, fill = topic)) + 
+  geom_area(alpha = 0.8, color = "black") + 
+  scale_fill_manual(labels = c("Human Interest", "National Security", "Police", 
+                               "Politics", "School Shootings", "Second Amendment"),
+                    values = c("#762a83", "#af8dc3", "#e7d4e8", 
+                               "#d9f0d3", "#7fbf7b", "#1b7837")) +
+  labs(fill = "Topics", 
+       x = "Week of the Year", 
+       y = "Topics",
+       title = "Topic Distribution Over Time: Liberal Outlets")
 
-ggplot(liberalTime, aes(x=date, y=perday_freq, fill=topic)) + 
-  geom_area(alpha=0.6 , size=1, colour="black") +
-  
-  labs(fill = "Topic", 
-       x = "Date", 
-       y = "Topic Frequency", 
-       title = "Liberal outlets: distribution of topics over time")
+liberalTimePlot
 
 ## conservative 
-conservativeTime <- conservative  %>%
-  group_by(date, topic) %>%
+conservativeTime <- conservative %>%
+  mutate(week = week(date)) %>% 
+  group_by(week, topic) %>%
   summarise(n = n()) %>%
-  mutate(perday_freq = n / sum(n))
+  mutate(perweek_freq = n / sum(n)) %>% 
+  ungroup() %>% 
+  mutate(week = as.Date(case_when(week == 22 ~ "2018-05-28",
+                                  week == 23 ~ "2018-06-04", 
+                                  week == 24 ~ "2018-06-11", 
+                                  week == 25 ~ "2018-06-18", 
+                                  week == 26 ~ "2018-06-25", 
+                                  week == 27 ~ "2018-07-02", 
+                                  week == 28 ~ "2018-07-09", 
+                                  week == 29 ~ "2018-07-16", 
+                                  week == 30 ~ "2018-07-23", 
+                                  week == 31 ~ "2018-07-30")))
 
-conservativeTime$date <- as.numeric(conservativeTime$date)
-conservativeTime$topic <- factor(conservativeTime$topic , levels=c("Police", "HumanInterest", 
-                                                                   "Politics", "NationalSecurity", 
-                                                                   "SchoolShootings", "SecondAmendment") )
+conservativeTimePlot <- ggplot(conservativeTime, 
+                          aes(x = week, y = perweek_freq, fill = topic)) + 
+  geom_area(alpha = 0.8, color = "black") + 
+  scale_fill_manual(labels = c("Human Interest", "National Security", "Police", 
+                               "Politics", "School Shootings", "Second Amendment"),
+                    values = c("#762a83", "#af8dc3", "#e7d4e8", 
+                               "#d9f0d3", "#7fbf7b", "#1b7837")) +
+  labs(fill = "Topics", 
+       x = "Week of the Year", 
+       y = "Topics",
+       title = "Topic Distribution Over Time: Conservative Outlets")
 
-ggplot(conservativeTime, aes(x=date, y=perday_freq, fill=topic)) + 
-  geom_area(alpha=0.6 , size=1, colour="black") +
-  
-  labs(fill = "Topic", 
-       x = "Date", 
-       y = "Topic Frequency", 
-       title = "Conservative outlets: distribution of topics over time")
+conservativeTimePlot
 
 ## very conservative 
-veryConservativeTime <- veryConservative  %>%
-  group_by(date, topic) %>%
+veryConservativeTimePlot <- veryConservative %>%
+  mutate(week = week(date)) %>% 
+  group_by(week, topic) %>%
   summarise(n = n()) %>%
-  mutate(perday_freq = n / sum(n))
+  mutate(perweek_freq = n / sum(n)) %>% 
+  ungroup() %>% 
+  mutate(week = as.Date(case_when(week == 22 ~ "2018-05-28",
+                                  week == 23 ~ "2018-06-04", 
+                                  week == 24 ~ "2018-06-11", 
+                                  week == 25 ~ "2018-06-18", 
+                                  week == 26 ~ "2018-06-25", 
+                                  week == 27 ~ "2018-07-02", 
+                                  week == 28 ~ "2018-07-09", 
+                                  week == 29 ~ "2018-07-16", 
+                                  week == 30 ~ "2018-07-23", 
+                                  week == 31 ~ "2018-07-30")))
 
-veryConservativeTime$date <- as.numeric(veryConservativeTime$date)
-veryConservativeTime$topic <- factor(veryConservativeTime$topic , levels=c("Police", "HumanInterest", 
-                                                                           "Politics", "NationalSecurity", 
-                                                                           "SchoolShootings", "SecondAmendment") )
+veryConservativeTimePlot <- ggplot(conservativeTime, 
+                               aes(x = week, y = perweek_freq, fill = topic)) + 
+  geom_area(alpha = 0.8, color = "black") + 
+  scale_fill_manual(labels = c("Human Interest", "National Security", "Police", 
+                               "Politics", "School Shootings", "Second Amendment"),
+                    values = c("#762a83", "#af8dc3", "#e7d4e8", 
+                               "#d9f0d3", "#7fbf7b", "#1b7837")) +
+  labs(fill = "Topics", 
+       x = "Week of the Year", 
+       y = "Topics",
+       title = "Topic Distribution Over Time: Very Conservative Outlets")
 
-ggplot(veryConservativeTime, aes(x=date, y=perday_freq, fill=topic)) + 
-  geom_area(alpha=0.6 , size=1, colour="black") +
-  
-  labs(fill = "Topic", 
-       x = "Date", 
-       y = "Topic Frequency", 
-       title = "Very conservative outlets: distribution of topics over time")
+veryConservativeTimePlot
